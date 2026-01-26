@@ -1,0 +1,269 @@
+[
+  {
+    "id": "spring-boot",
+    "category": "Backend",
+    "title": "Spring Boot Masterclass",
+    "subtitle": "Zero to Hero with English & Hinglish Explanations",
+    "icon": "Server",
+    "stats": [
+      { "label": "Modules", "value": "2 Sections", "icon": "Layout" },
+      { "label": "Topics", "value": "20+ Concepts", "icon": "GraduationCap" },
+      { "label": "Snippets", "value": "50+ Examples", "icon": "Terminal" }
+    ],
+    "sections": [
+      {
+        "id": "core-spring-boot",
+        "title": "🏗️ Core Spring Boot",
+        "intro": "Spring Boot is an opinionated framework that simplifies the bootstrapping and development of Spring applications.",
+        "topics": [
+          {
+            "id": "spring-application",
+            "title": "⚡ SpringApplication",
+            "explanations": {
+              "english": "@SpringBootApplication is a powerhouse annotation. It implicitly enables @Configuration, @EnableAutoConfiguration, and @ComponentScan. It serves as the launchpad for your application.",
+              "hinglish": "@SpringBootApplication ek powerhouse annotation hai. Ye automatic roop se @Configuration, @EnableAutoConfiguration, aur @ComponentScan ko enable karta hai. Ye aapki application ka launchpad (shuruaati point) hai."
+            },
+            "code": {
+              "title": "Main Application Class",
+              "language": "java",
+              "content": "@SpringBootApplication\npublic class DemoApplication {\n    public static void main(String[] args) {\n        // This line boots up the server\n        SpringApplication.run(DemoApplication.class, args);\n    }\n}"
+            },
+            "codeExplanations": {
+              "english": "The main method uses SpringApplication.run() to launch the application. This single line creates the ApplicationContext, performs a classpath scan, and starts the embedded Tomcat server.",
+              "hinglish": "Main method application launch karne ke liye SpringApplication.run() ka use karta hai. Ye ek line ApplicationContext create karti hai, classpath scan karti hai, aur embedded Tomcat server start karti hai."
+            },
+            "keyPoints": [
+              "Combines 3 annotations: Config, AutoConfig, ComponentScan",
+              "Bootstraps the application context",
+              "Starts the embedded Tomcat server by default"
+            ]
+          },
+          {
+            "id": "auto-configuration",
+            "title": "✨ Auto-Configuration Magic",
+            "explanations": {
+              "english": "Spring Boot looks at your classpath (JARs) and automatically configures beans. If you have H2 database driver, it configures an in-memory DB automatically.",
+              "hinglish": "Spring Boot aapke classpath (JARs) ko dekhta hai aur beans ko apne aap configure kar deta hai. Agar H2 database driver hai, toh ye automatically in-memory DB set kar dega."
+            },
+            "code": {
+              "title": "Behind the Scenes (Conceptual)",
+              "language": "java",
+              "content": "@Configuration\n@ConditionalOnClass(DataSource.class)\npublic class DatabaseConfig {\n    \n    @Bean\n    @ConditionalOnMissingBean\n    public DataSource dataSource() {\n        return new HikariDataSource();\n    }\n}"
+            },
+            "codeExplanations": {
+              "english": "This is how Spring Boot works internally. It checks if DataSource class exists (@ConditionalOnClass). If you haven't defined your own DataSource bean (@ConditionalOnMissingBean), it creates a default one for you.",
+              "hinglish": "Spring Boot andar se aise kaam karta hai. Ye check karta hai ki DataSource class exist karti hai ya nahi (@ConditionalOnClass). Agar aapne apna DataSource bean define nahi kiya hai (@ConditionalOnMissingBean), toh ye aapke liye ek default bana deta hai."
+            },
+            "keyPoints": [
+              "Scanning classpath for dependencies",
+              "Conditional logic (@ConditionalOnClass)",
+              "Reduces boilerplate code significantly"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "spring-core-di",
+        "title": "🔄 Dependency Injection (DI)",
+        "intro": "The heart of Spring. DI promotes loose coupling, making your code cleaner, easier to test, and more maintainable.",
+        "topics": [
+          {
+            "id": "di-concept",
+            "title": "💉 What is DI?",
+            "explanations": {
+              "english": "Instead of creating objects using 'new', you ask the factory (Spring Container) to give them to you. This is Inversion of Control.",
+              "hinglish": "'new' keyword se object banane ke bajaye, aap factory (Spring Container) se object mangte hain. Ise Inversion of Control kehte hain."
+            },
+            "code": {
+              "title": "Constructor Injection (Best Practice)",
+              "language": "java",
+              "content": "@Service\npublic class UserService {\n    private final UserRepository repo;\n    \n    // Spring injects the repo here automatically\n    @Autowired \n    public UserService(UserRepository repo) {\n        this.repo = repo;\n    }\n}"
+            },
+            "codeExplanations": {
+              "english": "Here, UserService requires a UserRepository. Instead of creating 'new UserRepository()' inside, we pass it as a constructor argument. The @Autowired annotation tells Spring to find a matching bean and inject it.",
+              "hinglish": "Yahan UserService ko UserRepository ki zaroorat hai. Andar 'new UserRepository()' create karne ke bajaye, hum ise constructor argument ke roop mein pass karte hain. @Autowired annotation Spring ko batata hai ki matching bean dhund kar inject kare."
+            },
+            "keyPoints": [
+              "Promotes loose coupling",
+              "Makes Unit Testing easier (Mocking)",
+              "Container manages lifecycle"
+            ]
+          },
+          {
+            "id": "stereotypes",
+            "title": "🏷️ Stereotype Annotations",
+            "explanations": {
+              "english": "These annotations tell Spring: 'Hey, this class is special, please manage it.' Specific names help in understanding the architecture.",
+              "hinglish": "Ye annotations Spring ko batate hain: 'Arre, ye class special hai, isko manage karo.' Specific naam architecture samajhne mein madad karte hain."
+            },
+            "code": {
+              "title": "Common Stereotypes",
+              "language": "java",
+              "content": "// 1. General Managed Bean\n@Component\npublic class EmailValidator { }\n\n// 2. Business Logic Layer\n@Service\npublic class UserService { }\n\n// 3. Database/Persistence Layer\n@Repository\npublic class UserRepository { }\n\n// 4. Web/API Layer\n@RestController\npublic class ApiController { }"
+            },
+            "codeExplanations": {
+              "english": "These are markers. @Service creates a singleton bean for business logic. @Repository creates a bean for database access and also handles database specific exceptions. @RestController is used for creating REST APIs.",
+              "hinglish": "Ye markers hain. @Service business logic ke liye singleton bean banata hai. @Repository database access ke liye bean banata hai aur exceptions handle karta hai. @RestController REST APIs banane ke liye use hota hai."
+            },
+            "keyPoints": [
+              "@Component is the parent annotation",
+              "@Repository adds DataExceptionTranslation",
+              "@RestController = @Controller + @ResponseBody"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "react-js",
+    "category": "Frontend",
+    "title": "React JS Fundamentals",
+    "subtitle": "Component-Based UI Development",
+    "icon": "Code",
+    "stats": [
+      { "label": "Core", "value": "Hooks", "icon": "Layout" },
+      { "label": "State", "value": "Redux/Context", "icon": "GraduationCap" },
+      { "label": "UI", "value": "JSX", "icon": "Terminal" }
+    ],
+    "sections": [
+      {
+        "id": "react-basics",
+        "title": "⚛️ React Core Concepts",
+        "intro": "Building user interfaces with reusable components.",
+        "topics": [
+          {
+            "id": "react-components",
+            "title": "🧩 Components & Props",
+            "explanations": {
+              "english": "Components are the building blocks of React. Props are read-only inputs passed to these components to make them dynamic.",
+              "hinglish": "Components React ke building blocks hain. Props read-only inputs hote hain jo components ko dynamic banane ke liye pass kiye jate hain."
+            },
+            "code": {
+              "title": "Functional Component",
+              "language": "javascript",
+              "content": "// A simple reusable component\nconst Welcome = ({ name }) => {\n  return <h1>Hello, {name}</h1>;\n};\n\n// Usage\n<Welcome name=\"Sara\" />"
+            },
+            "codeExplanations": {
+              "english": "The 'Welcome' function is a component. It takes 'props' (destructured as { name }) and returns JSX. When we use <Welcome name='Sara' />, React calls this function with name='Sara'.",
+              "hinglish": "'Welcome' function ek component hai. Ye 'props' (destructured { name }) leta hai aur JSX return karta hai. Jab hum <Welcome name='Sara' /> use karte hain, React is function ko name='Sara' ke saath call karta hai."
+            },
+            "keyPoints": [
+              "Components let you split the UI into independent pieces",
+              "Props are immutable (read-only)",
+              "Always start component names with a Capital letter"
+            ]
+          },
+          {
+            "id": "react-hooks-state",
+            "title": "🎣 useState Hook",
+            "explanations": {
+              "english": "useState is a Hook that lets you add React state to function components. It preserves values between renders.",
+              "hinglish": "useState ek Hook hai jo functional components mein state add karne deta hai. Ye renders ke beech values ko preserve karta hai."
+            },
+            "code": {
+              "title": "Counter Example",
+              "language": "javascript",
+              "content": "import { useState } from 'react';\n\nfunction Counter() {\n  // Declare a new state variable, which we'll call \"count\"\n  const [count, setCount] = useState(0);\n\n  return (\n    <button onClick={() => setCount(count + 1)}>\n      You clicked {count} times\n    </button>\n  );\n}"
+            },
+            "codeExplanations": {
+              "english": "useState(0) initializes the state 'count' to 0. It returns two things: the current value (count) and a function to update it (setCount). Calling setCount triggers a re-render.",
+              "hinglish": "useState(0) state 'count' ko 0 se initialize karta hai. Ye do cheezein return karta hai: current value (count) aur use update karne ka function (setCount). setCount call karne se re-render trigger hota hai."
+            },
+            "keyPoints": [
+              "Hooks allow using state without classes",
+              "Returns a pair: current value and a function to update it",
+              "Only call Hooks at the top level"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "javascript-es6",
+    "category": "Language",
+    "title": "JavaScript ES6+",
+    "subtitle": "Modern JavaScript Features",
+    "icon": "Globe",
+    "stats": [
+      { "label": "Syntax", "value": "ES6+", "icon": "Layout" },
+      { "label": "Async", "value": "Promises", "icon": "GraduationCap" },
+      { "label": "DOM", "value": "Manipulation", "icon": "Terminal" }
+    ],
+    "sections": [
+      {
+        "id": "js-modern",
+        "title": "🚀 Modern JS Features",
+        "intro": "Essential features for modern web development.",
+        "topics": [
+          {
+            "id": "js-arrow-functions",
+            "title": "🏹 Arrow Functions",
+            "explanations": {
+              "english": "Arrow functions provide a concise syntax for writing function expressions. They also lexically bind the 'this' value.",
+              "hinglish": "Arrow functions function expressions likhne ka ek chhota tareeka dete hain. Ye 'this' value ko bhi lexically bind karte hain."
+            },
+            "code": {
+              "title": "Arrow vs Regular Function",
+              "language": "javascript",
+              "content": "// Regular function\nconst add = function(a, b) {\n  return a + b;\n};\n\n// Arrow function\nconst add = (a, b) => a + b;\n\n// With array methods\nnumbers.map(n => n * 2);"
+            },
+            "codeExplanations": {
+              "english": "The arrow function removes the need for the 'function' keyword. If there is only one expression, you can remove the curly braces {} and the 'return' keyword is implied.",
+              "hinglish": "Arrow function 'function' keyword ki zaroorat hata deta hai. Agar sirf ek expression hai, toh aap curly braces {} hata sakte hain aur 'return' keyword implied hota hai (automatic mana jata hai)."
+            },
+            "keyPoints": [
+              "Shorter syntax",
+              "Implicit return for one-liners",
+              "Does not have its own 'this' context"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "core-java",
+    "category": "Language",
+    "title": "Core Java Deep Dive",
+    "subtitle": "Mastering the Fundamentals",
+    "icon": "Coffee",
+    "stats": [
+      { "label": "OOPs", "value": "Principles", "icon": "Layout" },
+      { "label": "New", "value": "Streams API", "icon": "GraduationCap" },
+      { "label": "Conc", "value": "Threads", "icon": "Terminal" }
+    ],
+    "sections": [
+      {
+        "id": "java-streams",
+        "title": "🌊 Java 8 Streams",
+        "intro": "Processing sequences of elements declaratively.",
+        "topics": [
+          {
+            "id": "stream-api",
+            "title": "⚡ Stream API Basics",
+            "explanations": {
+              "english": "Streams let you process data in a declarative way (like SQL). You can chain operations like filter, map, and reduce.",
+              "hinglish": "Streams aapko data ko declarative tareeke se process karne dete hain (SQL ki tarah). Aap filter, map, aur reduce jaise operations ko chain kar sakte hain."
+            },
+            "code": {
+              "title": "Filtering and Mapping",
+              "language": "java",
+              "content": "List<String> names = Arrays.asList(\"John\", \"Jane\", \"Adam\", \"Tom\");\n\nList<String> filteredNames = names.stream()\n    .filter(name -> name.startsWith(\"J\"))\n    .map(String::toUpperCase)\n    .collect(Collectors.toList());\n    \n// Output: [JOHN, JANE]"
+            },
+            "codeExplanations": {
+              "english": "The .stream() method opens the stream. .filter() keeps only names starting with 'J'. .map() transforms them to uppercase. Finally, .collect() gathers the results back into a List.",
+              "hinglish": ".stream() method stream open karta hai. .filter() sirf 'J' se shuru hone wale naam rakhta hai. .map() unhe uppercase mein badalta hai. Aakhir mein, .collect() results ko wapis List mein jama karta hai."
+            },
+            "keyPoints": [
+              "Declarative coding style",
+              "Lazy evaluation",
+              "Parallel processing capability"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

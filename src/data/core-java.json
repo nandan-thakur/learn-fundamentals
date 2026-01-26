@@ -1,0 +1,45 @@
+[
+  {
+    "id": "core-java",
+    "category": "Language",
+    "title": "Core Java Deep Dive",
+    "subtitle": "Mastering the Fundamentals",
+    "icon": "Coffee",
+    "stats": [
+      { "label": "OOPs", "value": "Principles", "icon": "Layout" },
+      { "label": "New", "value": "Streams API", "icon": "GraduationCap" },
+      { "label": "Conc", "value": "Threads", "icon": "Terminal" }
+    ],
+    "sections": [
+      {
+        "id": "java-streams",
+        "title": "🌊 Java 8 Streams",
+        "intro": "Processing sequences of elements declaratively.",
+        "topics": [
+          {
+            "id": "stream-api",
+            "title": "⚡ Stream API Basics",
+            "explanations": {
+              "english": "Streams let you process data in a declarative way (like SQL). You can chain operations like filter, map, and reduce.",
+              "hinglish": "Streams aapko data ko declarative tareeke se process karne dete hain (SQL ki tarah). Aap filter, map, aur reduce jaise operations ko chain kar sakte hain."
+            },
+            "code": {
+              "title": "Filtering and Mapping",
+              "language": "java",
+              "content": "List<String> names = Arrays.asList(\"John\", \"Jane\", \"Adam\", \"Tom\");\n\nList<String> filteredNames = names.stream()\n    .filter(name -> name.startsWith(\"J\"))\n    .map(String::toUpperCase)\n    .collect(Collectors.toList());\n    \n// Output: [JOHN, JANE]"
+            },
+            "codeExplanations": {
+              "english": "The .stream() method opens the stream. .filter() keeps only names starting with 'J'. .map() transforms them to uppercase. Finally, .collect() gathers the results back into a List.",
+              "hinglish": ".stream() method stream open karta hai. .filter() sirf 'J' se shuru hone wale naam rakhta hai. .map() unhe uppercase mein badalta hai. Aakhir mein, .collect() results ko wapis List mein jama karta hai."
+            },
+            "keyPoints": [
+              "Declarative coding style",
+              "Lazy evaluation",
+              "Parallel processing capability"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
