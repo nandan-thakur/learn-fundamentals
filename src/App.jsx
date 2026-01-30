@@ -1,21 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, BookMarked, Sun, Moon, Menu, X, ChevronRight, 
   Home, Printer, CheckCircle2, Copy, Check, Terminal, 
-  Layout, GraduationCap, ChevronDown, Code, Coffee, Globe, Server, FileCode
+  Layout, GraduationCap, ChevronDown, Code, Coffee, Globe, Server, FileCode,
+  Loader2
 } from 'lucide-react';
-import SPRING_BOOT_COURSES from './data/spring-boot.json';
-import REACT_JS_COURSES from './data/react-js.json';
-import JAVASCRIPT_ES6_COURSES from './data/javascript-es6.json';
-import CORE_JAVA_COURSES from './data/core-java.json';
 
-// Combine all courses into a single array
-const COURSES = [
-  ...SPRING_BOOT_COURSES,
-  ...REACT_JS_COURSES,
-  ...JAVASCRIPT_ES6_COURSES,
-  ...CORE_JAVA_COURSES
-];
+// API Endpoints for all courses
+const API_ENDPOINTS = {
+  springBoot: 'https://api.npoint.io/4d8b44f8f3c33fa4b563',
+  react: 'https://api.npoint.io/0243e7275bafea437ee5',
+  javascript: 'https://api.npoint.io/f676eaa384cd176dd74d',
+  coreJava: 'https://api.npoint.io/42092cc403a745c45f3e'
+};
 
 // --- UTILITY COMPONENTS ---
 
@@ -28,8 +25,8 @@ const CodeBlock = ({ code, language, darkMode }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Very basic syntax highlighting
   const highlightCode = (text) => {
+    if (!text) return null;
     return text.split('\n').map((line, i) => {
       const parts = line.split(/(@\w+|public|class|void|static|return|new|private|final|const|function|import|from|=>|let|var)/g);
       return (
@@ -104,7 +101,6 @@ const getIconComponent = (iconName) => {
 // --- MAIN APPLICATION ---
 
 const App = () => {
-  // Initialize based on screen width
   const [darkMode, setDarkMode] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(typeof window !== 'undefined' ? window.innerWidth >= 1024 : false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -113,11 +109,69 @@ const App = () => {
   const [activeTab, setActiveTab] = useState({}); 
   const [toast, setToast] = useState({ show: false, message: '' });
   
-  // New State for Multi-Course Support
-  const [activeCourseId, setActiveCourseId] = useState(COURSES[0].id);
+  // Data State
+  const [courses, setCourses] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeCourseId, setActiveCourseId] = useState('');
+
+  // Fetch All Courses from APIs
+  useEffect(() => {
+    const fetchCourses = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch all four endpoints in parallel
+        const responses = await Promise.all([
+          fetch(API_ENDPOINTS.springBoot),
+          fetch(API_ENDPOINTS.react),
+          fetch(API_ENDPOINTS.javascript),
+          fetch(API_ENDPOINTS.coreJava)
+        ]);
+
+        // Check if any request failed
+        if (responses.some(res => !res.ok)) {
+          throw new Error('Failed to fetch one or more courses');
+        }
+
+        // Parse all JSON responses
+        const [springData, reactData, jsData, javaData] = await Promise.all(
+          responses.map(res => res.json())
+        );
+
+        // Normalize data (handle single object or array)
+        const normalizeData = (data) => Array.isArray(data) ? data : [data];
+        
+        const allCourses = [
+          ...normalizeData(springData),
+          ...normalizeData(reactData),
+          ...normalizeData(jsData),
+          ...normalizeData(javaData)
+        ];
+
+        setCourses(allCourses);
+
+        // Set active course: prefer saved, otherwise first available
+        const savedCourseId = localStorage.getItem('activeCourseId');
+        const savedCourseExists = allCourses.find(c => c.id === savedCourseId);
+        
+        if (savedCourseExists) {
+          setActiveCourseId(savedCourseId);
+        } else if (allCourses.length > 0) {
+          setActiveCourseId(allCourses[0].id);
+        }
+
+      } catch (error) {
+        console.error("Error loading course data:", error);
+        setToast({ show: true, message: "Failed to load course data. Please refresh the page." });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
 
   // Derive current content based on selection
-  const contentData = COURSES.find(c => c.id === activeCourseId) || COURSES[0];
+  const contentData = courses.find(c => c.id === activeCourseId) || courses[0];
 
   // Handle Resize for Sidebar
   useEffect(() => {
@@ -142,9 +196,6 @@ const App = () => {
 
     const savedCompleted = localStorage.getItem('completedTopics');
     if (savedCompleted) setCompletedTopics(JSON.parse(savedCompleted));
-    
-    const savedCourse = localStorage.getItem('activeCourseId');
-    if (savedCourse && COURSES.some(c => c.id === savedCourse)) setActiveCourseId(savedCourse);
   }, []);
 
   useEffect(() => {
@@ -165,7 +216,9 @@ const App = () => {
   }, [completedTopics]);
 
   useEffect(() => {
-    localStorage.setItem('activeCourseId', activeCourseId);
+    if (activeCourseId) {
+      localStorage.setItem('activeCourseId', activeCourseId);
+    }
   }, [activeCourseId]);
 
   // Actions
@@ -197,25 +250,26 @@ const App = () => {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
-      // On mobile, close sidebar after click
       if (window.innerWidth < 1024) setSidebarOpen(false);
     }
   };
 
   // Calculations
-  const totalTopics = contentData.sections.reduce((acc, section) => acc + section.topics.length, 0);
-  const currentCourseCompleted = completedTopics.filter(id => 
+  const totalTopics = contentData?.sections ? contentData.sections.reduce((acc, section) => acc + section.topics.length, 0) : 0;
+  
+  const currentCourseCompleted = contentData?.sections ? completedTopics.filter(id => 
     contentData.sections.some(s => s.topics.some(t => t.id === id))
-  ).length;
+  ).length : 0;
+  
   const progressPercentage = totalTopics === 0 ? 0 : Math.round((currentCourseCompleted / totalTopics) * 100);
 
-  const filteredSections = contentData.sections.map(section => ({
+  const filteredSections = contentData?.sections ? contentData.sections.map(section => ({
     ...section,
     topics: section.topics.filter(topic => 
       topic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       topic.explanations.english.toLowerCase().includes(searchQuery.toLowerCase())
     )
-  })).filter(section => section.topics.length > 0);
+  })).filter(section => section.topics.length > 0) : [];
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${darkMode ? 'bg-gray-950 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
@@ -235,23 +289,29 @@ const App = () => {
               <div className="bg-blue-600 p-1.5 rounded-lg">
                 <Layout className="w-5 h-5 text-white" />
               </div>
-              <span className="font-bold text-lg hidden sm:block tracking-tight">{contentData.title}</span>
-              <span className="font-bold text-lg sm:hidden tracking-tight truncate max-w-[150px]">{contentData.title}</span>
+              <span className="font-bold text-lg hidden sm:block tracking-tight">
+                {isLoading && !contentData ? "Loading..." : contentData?.title || "Loading..."}
+              </span>
+              <span className="font-bold text-lg sm:hidden tracking-tight truncate max-w-[150px]">
+                {isLoading && !contentData ? "Loading..." : contentData?.title || "Loading..."}
+              </span>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-             {/* Progress Widget (Compact on mobile) */}
-             <div className="flex items-center gap-3 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800">
-                <span className="text-[10px] md:text-xs font-semibold text-gray-500 uppercase hidden sm:inline">Progress</span>
-                <div className="w-16 md:w-24 h-1.5 md:h-2 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-green-500 transition-all duration-500 ease-out"
-                    style={{ width: `${progressPercentage}%` }}
-                  />
-                </div>
-                <span className="text-[10px] md:text-xs font-mono">{progressPercentage}%</span>
-             </div>
+             {/* Progress Widget */}
+             {!isLoading && contentData && (
+               <div className="flex items-center gap-3 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800">
+                  <span className="text-[10px] md:text-xs font-semibold text-gray-500 uppercase hidden sm:inline">Progress</span>
+                  <div className="w-16 md:w-24 h-1.5 md:h-2 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-green-500 transition-all duration-500 ease-out"
+                      style={{ width: `${progressPercentage}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] md:text-xs font-mono">{progressPercentage}%</span>
+               </div>
+             )}
 
             <button onClick={() => setDarkMode(!darkMode)} className={`p-2 rounded-lg transition-all ${darkMode ? 'text-yellow-400 hover:bg-gray-800' : 'text-slate-600 hover:bg-gray-100'}`}>
               {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -295,255 +355,280 @@ const App = () => {
             <div className="mb-6 border-b border-gray-200 dark:border-gray-800 pb-4">
               <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-1">Select Guide</h3>
               <div className="space-y-1">
-                {COURSES.map(course => (
-                  <button 
-                    key={course.id}
-                    onClick={() => {
-                      setActiveCourseId(course.id);
-                      setSearchQuery(''); // Reset search when switching
-                      if (window.innerWidth < 1024) setSidebarOpen(false); // Close mobile menu on select
-                    }}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-3 ${
-                      activeCourseId === course.id
-                        ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                        : darkMode ? 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    <div className={activeCourseId === course.id ? 'text-white' : 'text-gray-400'}>
-                      {getIconComponent(course.icon)}
-                    </div>
-                    {course.title}
-                  </button>
-                ))}
+                {isLoading ? (
+                   <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-500">
+                     <Loader2 className="w-4 h-4 animate-spin" />
+                     <span>Loading courses...</span>
+                   </div>
+                ) : (
+                  courses.map(course => (
+                    <button 
+                      key={course.id}
+                      onClick={() => {
+                        setActiveCourseId(course.id);
+                        setSearchQuery(''); 
+                        if (window.innerWidth < 1024) setSidebarOpen(false); 
+                      }}
+                      className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-3 ${
+                        (contentData && contentData.id === course.id)
+                          ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                          : darkMode ? 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      <div className={(contentData && contentData.id === course.id) ? 'text-white' : 'text-gray-400'}>
+                        {getIconComponent(course.icon)}
+                      </div>
+                      {course.title}
+                    </button>
+                  ))
+                )}
               </div>
             </div>
 
-            <div className="relative mb-6">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder={`Search ${contentData.title}...`}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full pl-9 pr-4 py-2 text-sm rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
-                  darkMode ? 'bg-gray-800 border-gray-700 placeholder-gray-500' : 'bg-gray-50 border-gray-200'
-                }`}
-              />
-            </div>
+            {!isLoading && contentData && (
+              <>
+                <div className="relative mb-6">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder={`Search ${contentData.title}...`}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className={`w-full pl-9 pr-4 py-2 text-sm rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
+                      darkMode ? 'bg-gray-800 border-gray-700 placeholder-gray-500' : 'bg-gray-50 border-gray-200'
+                    }`}
+                  />
+                </div>
 
-            <div className="space-y-6 pb-20 lg:pb-0">
-              {filteredSections.map(section => (
-                <div key={section.id}>
-                  <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 ml-2">
-                    {section.title}
-                  </h3>
-                  <div className="space-y-1">
-                    {section.topics.map(topic => (
-                      <button
-                        key={topic.id}
-                        onClick={() => scrollToElement(topic.id)}
-                        className={`w-full text-left px-3 py-2.5 lg:py-2 rounded-lg text-sm transition-all flex items-center justify-between group ${
-                          completedTopics.includes(topic.id) 
-                            ? 'opacity-75' 
-                            : ''
-                        } ${
-                          darkMode 
-                            ? 'hover:bg-gray-800 text-gray-300' 
-                            : 'hover:bg-gray-50 text-gray-700'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 truncate">
-                          {completedTopics.includes(topic.id) && <CheckCircle2 className="w-3 h-3 text-green-500 shrink-0" />}
-                          <span className="truncate">{topic.title}</span>
-                        </div>
-                        {bookmarks.includes(topic.id) && <BookMarked className="w-3 h-3 text-blue-500 shrink-0" />}
-                      </button>
-                    ))}
-                  </div>
+                <div className="space-y-6 pb-20 lg:pb-0">
+                  {filteredSections.map(section => (
+                    <div key={section.id}>
+                      <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 ml-2">
+                        {section.title}
+                      </h3>
+                      <div className="space-y-1">
+                        {section.topics.map(topic => (
+                          <button
+                            key={topic.id}
+                            onClick={() => scrollToElement(topic.id)}
+                            className={`w-full text-left px-3 py-2.5 lg:py-2 rounded-lg text-sm transition-all flex items-center justify-between group ${
+                              completedTopics.includes(topic.id) 
+                                ? 'opacity-75' 
+                                : ''
+                            } ${
+                              darkMode 
+                                ? 'hover:bg-gray-800 text-gray-300' 
+                                : 'hover:bg-gray-50 text-gray-700'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 truncate">
+                              {completedTopics.includes(topic.id) && <CheckCircle2 className="w-3 h-3 text-green-500 shrink-0" />}
+                              <span className="truncate">{topic.title}</span>
+                            </div>
+                            {bookmarks.includes(topic.id) && <BookMarked className="w-3 h-3 text-blue-500 shrink-0" />}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {filteredSections.length === 0 && searchQuery && (
+                    <div className="text-center py-8 text-gray-500 text-sm">
+                      No topics found matching "{searchQuery}"
+                    </div>
+                  )}
                 </div>
-              ))}
-              
-              {filteredSections.length === 0 && (
-                <div className="text-center py-8 text-gray-500 text-sm">
-                  No topics found matching "{searchQuery}"
-                </div>
-              )}
-            </div>
+              </>
+            )}
           </div>
         </aside>
 
         {/* Main Content */}
         <main className="flex-1 min-w-0 pb-20 w-full">
           
-          {/* Welcome Card */}
-          <div className={`rounded-2xl p-6 lg:p-8 mb-8 border relative overflow-hidden ${darkMode ? 'bg-gradient-to-br from-blue-900 to-indigo-900 border-blue-800' : 'bg-gradient-to-br from-blue-600 to-indigo-600 border-blue-500'}`}>
-            <div className="relative z-10 text-white">
-              <div className="flex items-center gap-3 mb-2">
-                 <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
-                   {getIconComponent(contentData.icon)}
-                 </div>
-                 <h1 className="text-2xl lg:text-3xl font-bold">{contentData.title}</h1>
-              </div>
-              <p className="text-blue-100 mb-6 max-w-xl text-sm lg:text-base">{contentData.subtitle}</p>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:w-fit">
-                {contentData.stats.map((stat, i) => (
-                  <div key={i} className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/10 flex items-center sm:block gap-3 sm:gap-0">
-                    <div className="text-xl lg:text-2xl font-bold">{stat.value}</div>
-                    <div className="text-xs text-blue-200">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
+          {/* Loading State */}
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader2 className="w-12 h-12 animate-spin text-blue-600 mb-4" />
+              <p className="text-gray-500">Loading course content...</p>
             </div>
-            {/* Background decoration */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl"></div>
-          </div>
-
-          <div className="space-y-8 lg:space-y-12">
-            {filteredSections.map(section => (
-              <div key={section.id} id={section.id} className="scroll-mt-24">
-                <div className="flex items-start lg:items-center gap-3 mb-4 lg:mb-6">
-                  <div className={`p-2 rounded-lg shrink-0 ${darkMode ? 'bg-gray-800' : 'bg-white shadow-sm border border-gray-100'}`}>
-                    <Layout className="w-6 h-6 text-blue-500" />
+          ) : contentData ? (
+            <>
+              {/* Welcome Card */}
+              <div className={`rounded-2xl p-6 lg:p-8 mb-8 border relative overflow-hidden ${darkMode ? 'bg-gradient-to-br from-blue-900 to-indigo-900 border-blue-800' : 'bg-gradient-to-br from-blue-600 to-indigo-600 border-blue-500'}`}>
+                <div className="relative z-10 text-white">
+                  <div className="flex items-center gap-3 mb-2">
+                     <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
+                       {getIconComponent(contentData.icon)}
+                     </div>
+                     <h1 className="text-2xl lg:text-3xl font-bold">{contentData.title}</h1>
                   </div>
-                  <div>
-                    <h2 className="text-xl lg:text-2xl font-bold">{section.title}</h2>
-                    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{section.intro}</p>
+                  <p className="text-blue-100 mb-6 max-w-xl text-sm lg:text-base">{contentData.subtitle}</p>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:w-fit">
+                    {contentData.stats && contentData.stats.map((stat, i) => (
+                      <div key={i} className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/10 flex items-center sm:block gap-3 sm:gap-0">
+                        <div className="text-xl lg:text-2xl font-bold">{stat.value}</div>
+                        <div className="text-xs text-blue-200">{stat.label}</div>
+                      </div>
+                    ))}
                   </div>
                 </div>
+                {/* Background decoration */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl"></div>
+              </div>
 
-                <div className="grid gap-4 lg:gap-6">
-                  {section.topics.map(topic => {
-                    const currentLang = activeTab[topic.id] || 'english';
-                    const isBookmarked = bookmarks.includes(topic.id);
-                    const isCompleted = completedTopics.includes(topic.id);
+              <div className="space-y-8 lg:space-y-12">
+                {filteredSections.map(section => (
+                  <div key={section.id} id={section.id} className="scroll-mt-24">
+                    <div className="flex items-start lg:items-center gap-3 mb-4 lg:mb-6">
+                      <div className={`p-2 rounded-lg shrink-0 ${darkMode ? 'bg-gray-800' : 'bg-white shadow-sm border border-gray-100'}`}>
+                        <Layout className="w-6 h-6 text-blue-500" />
+                      </div>
+                      <div>
+                        <h2 className="text-xl lg:text-2xl font-bold">{section.title}</h2>
+                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{section.intro}</p>
+                      </div>
+                    </div>
 
-                    return (
-                      <div 
-                        key={topic.id} 
-                        id={topic.id} 
-                        className={`rounded-xl lg:rounded-2xl border transition-all duration-300 scroll-mt-28 ${
-                          darkMode 
-                            ? 'bg-gray-900 border-gray-800 hover:border-gray-700' 
-                            : 'bg-white border-gray-200 shadow-sm hover:shadow-md'
-                        } ${isCompleted ? 'opacity-90 grayscale-[30%]' : ''}`}
-                      >
-                        {/* Card Header */}
-                        <div className="p-4 lg:p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-start">
-                          <div className="flex items-start gap-3">
-                            <button 
-                              onClick={() => toggleComplete(topic.id)}
-                              className={`mt-1 p-1 rounded-full border-2 shrink-0 transition-colors ${
-                                isCompleted 
-                                  ? 'bg-green-500 border-green-500 text-white' 
-                                  : 'border-gray-300 text-transparent hover:border-green-400'
-                              }`}
-                            >
-                              <Check className="w-3 h-3" />
-                            </button>
-                            <h3 className={`text-lg lg:text-xl font-bold leading-tight ${isCompleted ? 'text-gray-500 line-through decoration-gray-500/50' : ''}`}>
-                              {topic.title}
-                            </h3>
-                          </div>
-                          <div className="flex gap-2">
-                            <button 
-                              onClick={() => toggleBookmark(topic.id)}
-                              className={`p-2 rounded-lg transition-colors ${
-                                isBookmarked 
-                                  ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' 
-                                  : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-                              }`}
-                            >
-                              <BookMarked className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </div>
+                    <div className="grid gap-4 lg:gap-6">
+                      {section.topics.map(topic => {
+                        const currentLang = activeTab[topic.id] || 'english';
+                        const isBookmarked = bookmarks.includes(topic.id);
+                        const isCompleted = completedTopics.includes(topic.id);
 
-                        <div className="p-4 lg:p-6">
-                          {/* Language Tabs */}
-                          <div className={`inline-flex p-1 rounded-lg mb-4 w-full sm:w-auto ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                            <button
-                              onClick={() => setTopicTab(topic.id, 'english')}
-                              className={`flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                                currentLang === 'english'
-                                  ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white'
-                                  : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'
-                              }`}
-                            >
-                              🇬🇧 English
-                            </button>
-                            <button
-                              onClick={() => setTopicTab(topic.id, 'hinglish')}
-                              className={`flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                                currentLang === 'hinglish'
-                                  ? 'bg-white text-indigo-600 shadow-sm dark:bg-indigo-600 dark:text-white'
-                                  : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'
-                              }`}
-                            >
-                              🇮🇳 Hinglish
-                            </button>
-                          </div>
-
-                          {/* Explanation Content */}
-                          <div className="min-h-[60px] lg:min-h-[80px]">
-                            <p className={`text-base lg:text-lg leading-relaxed ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                              {topic.explanations[currentLang]}
-                            </p>
-                          </div>
-
-                          {/* Code Section */}
-                          {topic.code && (
-                            <div className="mt-6">
-                              <div className="flex items-center gap-2 mb-2">
-                                <Terminal className="w-4 h-4 text-gray-400" />
-                                <span className="text-sm font-medium text-gray-500">{topic.code.title}</span>
+                        return (
+                          <div 
+                            key={topic.id} 
+                            id={topic.id} 
+                            className={`rounded-xl lg:rounded-2xl border transition-all duration-300 scroll-mt-28 ${
+                              darkMode 
+                                ? 'bg-gray-900 border-gray-800 hover:border-gray-700' 
+                                : 'bg-white border-gray-200 shadow-sm hover:shadow-md'
+                            } ${isCompleted ? 'opacity-90 grayscale-[30%]' : ''}`}
+                          >
+                            {/* Card Header */}
+                            <div className="p-4 lg:p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-start">
+                              <div className="flex items-start gap-3">
+                                <button 
+                                  onClick={() => toggleComplete(topic.id)}
+                                  className={`mt-1 p-1 rounded-full border-2 shrink-0 transition-colors ${
+                                    isCompleted 
+                                      ? 'bg-green-500 border-green-500 text-white' 
+                                      : 'border-gray-300 text-transparent hover:border-green-400'
+                                  }`}
+                                >
+                                  <Check className="w-3 h-3" />
+                                </button>
+                                <h3 className={`text-lg lg:text-xl font-bold leading-tight ${isCompleted ? 'text-gray-500 line-through decoration-gray-500/50' : ''}`}>
+                                  {topic.title}
+                                </h3>
                               </div>
-                              <CodeBlock code={topic.code.content} language={topic.code.language} darkMode={darkMode} />
-                              
-                              {/* New Code Explanation Section */}
-                              {topic.codeExplanations && (
-                                <div className={`mt-4 p-4 rounded-lg border-l-4 ${darkMode ? 'bg-gray-800 border-purple-500' : 'bg-blue-50 border-purple-500'}`}>
-                                  <h5 className={`text-sm font-bold mb-2 flex items-center gap-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                                     <FileCode className="w-4 h-4" />
-                                     Code Explanation ({currentLang === 'english' ? 'English' : 'Hinglish'})
-                                  </h5>
-                                  <p className={`text-sm leading-relaxed ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                                    {topic.codeExplanations[currentLang]}
-                                  </p>
+                              <div className="flex gap-2">
+                                <button 
+                                  onClick={() => toggleBookmark(topic.id)}
+                                  className={`p-2 rounded-lg transition-colors ${
+                                    isBookmarked 
+                                      ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' 
+                                      : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                  }`}
+                                >
+                                  <BookMarked className="w-5 h-5" />
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="p-4 lg:p-6">
+                              {/* Language Tabs */}
+                              <div className={`inline-flex p-1 rounded-lg mb-4 w-full sm:w-auto ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                                <button
+                                  onClick={() => setTopicTab(topic.id, 'english')}
+                                  className={`flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+                                    currentLang === 'english'
+                                      ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white'
+                                      : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'
+                                  }`}
+                                >
+                                  🇬🇧 English
+                                </button>
+                                <button
+                                  onClick={() => setTopicTab(topic.id, 'hinglish')}
+                                  className={`flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+                                    currentLang === 'hinglish'
+                                      ? 'bg-white text-indigo-600 shadow-sm dark:bg-indigo-600 dark:text-white'
+                                      : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'
+                                  }`}
+                                >
+                                  🇮🇳 Hinglish
+                                </button>
+                              </div>
+
+                              {/* Explanation Content */}
+                              <div className="min-h-[60px] lg:min-h-[80px]">
+                                <p className={`text-base lg:text-lg leading-relaxed ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                  {topic.explanations[currentLang]}
+                                </p>
+                              </div>
+
+                              {/* Code Section */}
+                              {topic.code && (
+                                <div className="mt-6">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Terminal className="w-4 h-4 text-gray-400" />
+                                    <span className="text-sm font-medium text-gray-500">{topic.code.title}</span>
+                                  </div>
+                                  <CodeBlock code={topic.code.content} language={topic.code.language} darkMode={darkMode} />
+                                  
+                                  {/* New Code Explanation Section */}
+                                  {topic.codeExplanations && (
+                                    <div className={`mt-4 p-4 rounded-lg border-l-4 ${darkMode ? 'bg-gray-800 border-purple-500' : 'bg-blue-50 border-purple-500'}`}>
+                                      <h5 className={`text-sm font-bold mb-2 flex items-center gap-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+                                         <FileCode className="w-4 h-4" />
+                                         Code Explanation ({currentLang === 'english' ? 'English' : 'Hinglish'})
+                                      </h5>
+                                      <p className={`text-sm leading-relaxed ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                        {topic.codeExplanations[currentLang]}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Key Points */}
+                              {topic.keyPoints && (
+                                <div className={`mt-6 p-4 rounded-xl ${darkMode ? 'bg-blue-900/10 border border-blue-900/30' : 'bg-blue-50 border border-blue-100'}`}>
+                                  <h4 className={`text-sm font-bold uppercase tracking-wider mb-3 flex items-center gap-2 ${darkMode ? 'text-blue-400' : 'text-blue-700'}`}>
+                                    <GraduationCap className="w-4 h-4" />
+                                    Key Takeaways
+                                  </h4>
+                                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {topic.keyPoints.map((point, idx) => (
+                                      <li key={idx} className="flex items-start gap-2 text-sm">
+                                        <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+                                        <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>{point}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
                                 </div>
                               )}
                             </div>
-                          )}
-
-                          {/* Key Points */}
-                          {topic.keyPoints && (
-                            <div className={`mt-6 p-4 rounded-xl ${darkMode ? 'bg-blue-900/10 border border-blue-900/30' : 'bg-blue-50 border border-blue-100'}`}>
-                              <h4 className={`text-sm font-bold uppercase tracking-wider mb-3 flex items-center gap-2 ${darkMode ? 'text-blue-400' : 'text-blue-700'}`}>
-                                <GraduationCap className="w-4 h-4" />
-                                Key Takeaways
-                              </h4>
-                              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                {topic.keyPoints.map((point, idx) => (
-                                  <li key={idx} className="flex items-start gap-2 text-sm">
-                                    <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
-                                    <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>{point}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          <div className="mt-12 text-center text-gray-500 text-sm py-8 border-t border-gray-200 dark:border-gray-800">
-             Keep learning and building! 🚀
-          </div>
+              <div className="mt-12 text-center text-gray-500 text-sm py-8 border-t border-gray-200 dark:border-gray-800">
+                 Keep learning and building! 🚀
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+              <p>Failed to load courses. Please check your connection and refresh.</p>
+            </div>
+          )}
         </main>
       </div>
     </div>
