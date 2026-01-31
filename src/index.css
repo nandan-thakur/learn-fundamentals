@@ -1,1 +1,52 @@
 @import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+/* --- FIXED: Custom Dark Scrollbar --- */
+/* Works on Chrome, Edge, and Safari */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent; 
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #334155; /* Slate-700 */
+  border-radius: 4px;
+  border: 2px solid transparent; /* Creates padding effect */
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #475569; /* Slate-600 */
+}
+
+/* Firefox Support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
+}
+
+/* --- FIXED: Mobile Layout Constraints --- */
+body, html {
+  height: 100%;
+  overflow: hidden; /* Prevent body scroll, handle inside components */
+  background-color: #0B1120;
+}
+
+/* Ensure code blocks don't break layout */
+pre {
+  overflow-x: auto;
+}
+
+.font-code {
+  font-family: 'Fira Code', 'JetBrains Mono', monospace;
+}

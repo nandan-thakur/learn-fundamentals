@@ -1,20 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Search, BookMarked, Sun, Moon, Menu, X, ChevronRight, 
-  Home, Printer, CheckCircle2, Copy, Check, Terminal, 
-  Layout, GraduationCap, ChevronDown, Code, Coffee, Globe, Server, FileCode,
-  Loader2
+  Search, BookMarked, Sun, Moon, Menu, X, 
+  Layout, CheckCircle2, Copy, Check, Terminal, 
+  Network, ArrowRightLeft, Lightbulb, Server, 
+  Code, Globe, Coffee, List, Sparkles, Zap, 
+  BookOpen, Languages, Home, Loader2
 } from 'lucide-react';
 
-// API Endpoints for all courses
-const API_ENDPOINTS = {
-  springBoot: 'https://api.npoint.io/4d8b44f8f3c33fa4b563',
-  react: 'https://api.npoint.io/0243e7275bafea437ee5',
-  javascript: 'https://api.npoint.io/f676eaa384cd176dd74d',
-  coreJava: 'https://api.npoint.io/42092cc403a745c45f3e'
-};
+// --- CONFIGURATION ---
+const FILE_LIST = [
+  'corejava.json',
+  'collections.json',
+  'springboot.json',
+  'javascript.json',
+  'react.json',
+];
 
 // --- UTILITY COMPONENTS ---
+
+const DotPattern = ({ darkMode }) => (
+  <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden opacity-[0.4]">
+    <svg className="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="dot-pattern" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+          <circle cx="2" cy="2" r="1" className={darkMode ? "fill-gray-700" : "fill-gray-300"} />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#dot-pattern)" />
+    </svg>
+  </div>
+);
 
 const CodeBlock = ({ code, language, darkMode }) => {
   const [copied, setCopied] = useState(false);
@@ -28,16 +43,17 @@ const CodeBlock = ({ code, language, darkMode }) => {
   const highlightCode = (text) => {
     if (!text) return null;
     return text.split('\n').map((line, i) => {
-      const parts = line.split(/(@\w+|public|class|void|static|return|new|private|final|const|function|import|from|=>|let|var)/g);
+      const parts = line.split(/(@\w+|public|class|void|static|return|new|private|final|const|function|import|from|=>|let|var|\/\/.*)/g);
       return (
-        <div key={i} className="table-row">
-          <span className="table-cell text-right pr-4 select-none text-gray-500 w-8 text-xs">{i + 1}</span>
-          <span className="table-cell break-all whitespace-pre-wrap">
+        <div key={i} className="table-row group hover:bg-white/5 transition-colors">
+          <span className="table-cell text-right pr-4 select-none text-gray-600 dark:text-gray-600 w-8 text-xs group-hover:text-gray-400">{i + 1}</span>
+          <span className="table-cell break-all whitespace-pre-wrap font-code text-[13px] sm:text-sm">
             {parts.map((part, index) => {
-              if (part.startsWith('@')) return <span key={index} className="text-yellow-500">{part}</span>;
+              if (part.startsWith('//')) return <span key={index} className="text-gray-500 italic">{part}</span>;
+              if (part.startsWith('@')) return <span key={index} className="text-yellow-600 dark:text-yellow-400">{part}</span>;
               if (['public', 'class', 'void', 'static', 'return', 'new', 'private', 'final', 'const', 'function', 'import', 'from', 'let', 'var'].includes(part)) 
-                return <span key={index} className="text-purple-400 font-semibold">{part}</span>;
-              if (['=>'].includes(part)) return <span key={index} className="text-blue-400 font-bold">{part}</span>;
+                return <span key={index} className="text-purple-600 dark:text-purple-400 font-semibold">{part}</span>;
+              if (['=>'].includes(part)) return <span key={index} className="text-blue-500 font-bold">{part}</span>;
               return part;
             })}
           </span>
@@ -47,18 +63,23 @@ const CodeBlock = ({ code, language, darkMode }) => {
   };
 
   return (
-    <div className={`relative rounded-xl overflow-hidden my-4 border ${darkMode ? 'border-gray-700 bg-gray-950' : 'border-gray-200 bg-gray-900'}`}>
-      <div className="flex justify-between items-center px-4 py-2 bg-gray-800 border-b border-gray-700">
-        <span className="text-xs font-mono text-gray-400 uppercase">{language}</span>
+    <div className={`relative rounded-xl overflow-hidden my-6 shadow-xl transition-all ${darkMode ? 'bg-[#1e1e2e] border border-gray-800' : 'bg-gray-900 border border-gray-800'}`}>
+      <div className="flex justify-between items-center px-4 py-3 bg-[#181825] border-b border-white/5">
+        <div className="flex gap-2">
+          <div className="w-3 h-3 rounded-full bg-red-500/80" />
+          <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+          <div className="w-3 h-3 rounded-full bg-green-500/80" />
+        </div>
+        <span className="text-xs font-mono text-gray-500 uppercase tracking-wider">{language}</span>
         <button 
           onClick={handleCopy}
-          className="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-colors"
+          className="flex items-center gap-1.5 text-xs font-medium text-gray-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 px-2 py-1 rounded"
         >
-          {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-          {copied ? 'Copied!' : 'Copy'}
+          {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+          {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
-      <div className="p-4 overflow-x-auto font-mono text-sm text-gray-300">
+      <div className="p-4 overflow-x-auto text-gray-300 font-mono">
         <div className="table w-full">
           {highlightCode(code)}
         </div>
@@ -67,127 +88,173 @@ const CodeBlock = ({ code, language, darkMode }) => {
   );
 };
 
-const Toast = ({ message, show, onClose }) => {
-  useEffect(() => {
-    if (show) {
-      const timer = setTimeout(onClose, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [show, onClose]);
-
-  if (!show) return null;
+const ComparisonTable = ({ data, darkMode }) => {
+  if (!data || typeof data !== 'string') return null;
+  const parseRow = (row) => row.trim().replace(/^\||\|$/g, '').split('|').map(cell => cell.trim());
+  const rows = data.trim().split('\n').filter(r => r.trim() !== '');
+  if (rows.length === 0) return null;
+  const headers = parseRow(rows[0]);
+  const bodyRows = rows.slice(rows.length > 1 && rows[1].includes('---') ? 2 : 1).map(parseRow);
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 animate-bounce-in max-w-[90vw]">
-      <div className="bg-gray-800 text-white px-4 py-3 rounded-lg shadow-xl flex items-center gap-3 border border-gray-700">
-        <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" />
-        <span className="text-sm font-medium">{message}</span>
-      </div>
+    <div className={`overflow-x-auto my-6 rounded-xl border shadow-sm ${darkMode ? 'border-gray-800 bg-gray-900/50' : 'border-gray-200 bg-white'}`}>
+      <table className="w-full text-sm text-left">
+        <thead className={`text-xs uppercase tracking-wider ${darkMode ? 'bg-gray-800/50 text-gray-400' : 'bg-gray-50 text-gray-500'}`}>
+          <tr>{headers.map((h, i) => <th key={i} className="px-6 py-4 font-semibold">{h}</th>)}</tr>
+        </thead>
+        <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+          {bodyRows.map((row, i) => (
+            <tr key={i} className={`transition-colors ${darkMode ? 'hover:bg-white/5' : 'hover:bg-gray-50'}`}>
+              {row.map((cell, j) => <td key={j} className={`px-6 py-4 font-medium whitespace-pre-wrap ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{cell}</td>)}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
 
-// --- ICON MAPPING ---
 const getIconComponent = (iconName) => {
   const iconMap = {
-    'Server': <Server className="w-4 h-4" />,
-    'Code': <Code className="w-4 h-4" />,
-    'Globe': <Globe className="w-4 h-4" />,
-    'Coffee': <Coffee className="w-4 h-4" />
+    'Server': <Server className="w-5 h-5" />, 'Code': <Code className="w-5 h-5" />,
+    'Globe': <Globe className="w-5 h-5" />, 'Coffee': <Coffee className="w-5 h-5" />,
+    'Users': <CheckCircle2 className="w-5 h-5" />, 'Star': <Sparkles className="w-5 h-5" />,
+    'Layout': <Layout className="w-5 h-5" />, 'List': <List className="w-5 h-5" />
   };
-  return iconMap[iconName] || <Layout className="w-4 h-4" />;
+  return iconMap[iconName] || <Zap className="w-5 h-5" />;
 };
 
 // --- MAIN APPLICATION ---
 
 const App = () => {
   const [darkMode, setDarkMode] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(typeof window !== 'undefined' ? window.innerWidth >= 1024 : false);
+  
+  // FIX 1: Initialize based on screen width so desktop starts open
+  const [sidebarOpen, setSidebarOpen] = useState(
+    typeof window !== 'undefined' ? window.innerWidth >= 1024 : false
+  );
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [bookmarks, setBookmarks] = useState([]);
   const [completedTopics, setCompletedTopics] = useState([]);
-  const [activeTab, setActiveTab] = useState({}); 
-  const [toast, setToast] = useState({ show: false, message: '' });
   
-  // Data State
-  const [courses, setCourses] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [dataCache, setDataCache] = useState({});
+  const [courseList, setCourseList] = useState([]); 
   const [activeCourseId, setActiveCourseId] = useState('');
+  const [appLanguage, setAppLanguage] = useState('english');
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch All Courses from APIs
+  // --- 1. INITIAL LOAD (Metadata) ---
   useEffect(() => {
-    const fetchCourses = async () => {
-      setIsLoading(true);
+    const loadMetadata = async () => {
       try {
-        // Fetch all four endpoints in parallel
-        const responses = await Promise.all([
-          fetch(API_ENDPOINTS.springBoot),
-          fetch(API_ENDPOINTS.react),
-          fetch(API_ENDPOINTS.javascript),
-          fetch(API_ENDPOINTS.coreJava)
-        ]);
-
-        // Check if any request failed
-        if (responses.some(res => !res.ok)) {
-          throw new Error('Failed to fetch one or more courses');
-        }
-
-        // Parse all JSON responses
-        const [springData, reactData, jsData, javaData] = await Promise.all(
-          responses.map(res => res.json())
-        );
-
-        // Normalize data (handle single object or array)
-        const normalizeData = (data) => Array.isArray(data) ? data : [data];
+        const promises = FILE_LIST.map(file => fetch(`/learn-fundamentals/data/english/${file}`).then(res => res.ok ? res.json() : null));
+        const results = await Promise.all(promises);
+        const validCourses = results.flat().filter(Boolean);
+        setCourseList(validCourses);
         
-        const allCourses = [
-          ...normalizeData(springData),
-          ...normalizeData(reactData),
-          ...normalizeData(jsData),
-          ...normalizeData(javaData)
-        ];
-
-        setCourses(allCourses);
-
-        // Set active course: prefer saved, otherwise first available
-        const savedCourseId = localStorage.getItem('activeCourseId');
-        const savedCourseExists = allCourses.find(c => c.id === savedCourseId);
-        
-        if (savedCourseExists) {
-          setActiveCourseId(savedCourseId);
-        } else if (allCourses.length > 0) {
-          setActiveCourseId(allCourses[0].id);
+        const savedId = localStorage.getItem('activeCourseId');
+        if (savedId && validCourses.find(c => c.id === savedId)) {
+          setActiveCourseId(savedId);
+        } else if (validCourses.length > 0) {
+          setActiveCourseId(validCourses[0].id);
         }
-
-      } catch (error) {
-        console.error("Error loading course data:", error);
-        setToast({ show: true, message: "Failed to load course data. Please refresh the page." });
+      } catch (e) {
+        console.error("Meta load failed", e);
       } finally {
         setIsLoading(false);
       }
     };
-
-    fetchCourses();
+    loadMetadata();
   }, []);
 
-  // Derive current content based on selection
-  const contentData = courses.find(c => c.id === activeCourseId) || courses[0];
-
-  // Handle Resize for Sidebar
+  // --- 2. ACTIVE COURSE FETCHING (Dual Language) ---
   useEffect(() => {
+    if (!activeCourseId) return;
+
+    const fetchDataForCourse = async () => {
+        if (dataCache[activeCourseId]) return;
+
+        setIsLoading(true);
+        try {
+            const engRes = await Promise.all(FILE_LIST.map(f => fetch(`/learn-fundamentals/data/english/${f}`).then(r=>r.json())));
+            const engFlat = engRes.flat();
+            const engCourse = engFlat.find(c => c.id === activeCourseId);
+
+            const hinRes = await Promise.all(FILE_LIST.map(f => fetch(`/learn-fundamentals/data/hinglish/${f}`).then(r => r.ok ? r.json() : null)));
+            const hinFlat = hinRes.flat().filter(Boolean);
+            const hinCourse = hinFlat.find(c => c.id === activeCourseId);
+
+            if (engCourse) {
+                setDataCache(prev => ({
+                    ...prev,
+                    [activeCourseId]: {
+                        english: engCourse,
+                        hinglish: hinCourse || null 
+                    }
+                }));
+            }
+        } catch (e) {
+            console.error("Content load failed", e);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    fetchDataForCourse();
+    localStorage.setItem('activeCourseId', activeCourseId);
+  }, [activeCourseId]);
+
+
+  // --- 3. MERGE LOGIC ---
+  const currentContent = useMemo(() => {
+    if (!activeCourseId || !dataCache[activeCourseId]) return null;
+    
+    const { english, hinglish } = dataCache[activeCourseId];
+    
+    if (appLanguage === 'english' || !hinglish) return english;
+    
+    return {
+      ...english,
+      title: hinglish.title || english.title,
+      subtitle: hinglish.subtitle || english.subtitle,
+      sections: english.sections.map(engSec => {
+        const hinSec = hinglish.sections?.find(s => s.id === engSec.id);
+        if (!hinSec) return engSec;
+
+        return {
+          ...engSec,
+          title: hinSec.title || engSec.title,
+          intro: hinSec.intro || engSec.intro,
+          topics: engSec.topics.map(engTop => {
+            const hinTop = hinSec.topics?.find(t => t.id === engTop.id);
+            if (!hinTop) return engTop;
+
+            return {
+              ...engTop,
+              title: hinTop.title || engTop.title,
+              explanations: hinTop.explanations || engTop.explanations,
+              keyPoints: hinTop.keyPoints || engTop.keyPoints,
+              extras: hinTop.extras || engTop.extras, 
+              codeExplanations: hinTop.codeExplanations || engTop.codeExplanations,
+              code: engTop.code 
+            };
+          })
+        };
+      })
+    };
+  }, [activeCourseId, dataCache, appLanguage]);
+
+
+  // --- STANDARD EFFECTS ---
+  useEffect(() => {
+    // Handle resize to auto-open sidebar on desktop
     const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setSidebarOpen(true);
-      } else {
-        setSidebarOpen(false);
-      }
+      if (window.innerWidth >= 1024) setSidebarOpen(true);
+      else setSidebarOpen(false);
     };
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
-  // Persistence
-  useEffect(() => {
     const savedMode = localStorage.getItem('darkMode');
     if (savedMode) setDarkMode(JSON.parse(savedMode));
     
@@ -196,15 +263,14 @@ const App = () => {
 
     const savedCompleted = localStorage.getItem('completedTopics');
     if (savedCompleted) setCompletedTopics(JSON.parse(savedCompleted));
+
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {
     localStorage.setItem('darkMode', JSON.stringify(darkMode));
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    if (darkMode) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
   }, [darkMode]);
 
   useEffect(() => {
@@ -215,422 +281,288 @@ const App = () => {
     localStorage.setItem('completedTopics', JSON.stringify(completedTopics));
   }, [completedTopics]);
 
-  useEffect(() => {
-    if (activeCourseId) {
-      localStorage.setItem('activeCourseId', activeCourseId);
-    }
-  }, [activeCourseId]);
-
-  // Actions
-  const showToast = (message) => {
-    setToast({ show: true, message });
-  };
-
+  // --- ACTIONS ---
   const toggleBookmark = (topicId) => {
-    setBookmarks(prev => {
-      const isBookmarked = prev.includes(topicId);
-      showToast(isBookmarked ? "Removed from bookmarks" : "Added to bookmarks");
-      return isBookmarked ? prev.filter(id => id !== topicId) : [...prev, topicId];
-    });
+    setBookmarks(prev => prev.includes(topicId) ? prev.filter(id => id !== topicId) : [...prev, topicId]);
   };
 
   const toggleComplete = (topicId) => {
-    setCompletedTopics(prev => {
-      const isComplete = prev.includes(topicId);
-      if (!isComplete) showToast("Topic marked as complete! 🎉");
-      return isComplete ? prev.filter(id => id !== topicId) : [...prev, topicId];
-    });
-  };
-
-  const setTopicTab = (topicId, lang) => {
-    setActiveTab(prev => ({ ...prev, [topicId]: lang }));
+    setCompletedTopics(prev => prev.includes(topicId) ? prev.filter(id => id !== topicId) : [...prev, topicId]);
   };
 
   const scrollToElement = (id) => {
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      const yOffset = -80; 
+      const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
+      window.scrollTo({top: y, behavior: 'smooth'});
       if (window.innerWidth < 1024) setSidebarOpen(false);
     }
   };
 
-  // Calculations
-  const totalTopics = contentData?.sections ? contentData.sections.reduce((acc, section) => acc + section.topics.length, 0) : 0;
-  
-  const currentCourseCompleted = contentData?.sections ? completedTopics.filter(id => 
-    contentData.sections.some(s => s.topics.some(t => t.id === id))
-  ).length : 0;
-  
-  const progressPercentage = totalTopics === 0 ? 0 : Math.round((currentCourseCompleted / totalTopics) * 100);
-
-  const filteredSections = contentData?.sections ? contentData.sections.map(section => ({
+  const filteredSections = currentContent?.sections ? currentContent.sections.map(section => ({
     ...section,
     topics: section.topics.filter(topic => 
       topic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      topic.explanations.english.toLowerCase().includes(searchQuery.toLowerCase())
+      (topic.explanations?.english || "").toLowerCase().includes(searchQuery.toLowerCase())
     )
   })).filter(section => section.topics.length > 0) : [];
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${darkMode ? 'bg-gray-950 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
-      <Toast show={toast.show} message={toast.message} onClose={() => setToast({ ...toast, show: false })} />
+    <div className={`flex flex-col h-dvh font-sans antialiased transition-colors duration-500 ${darkMode ? 'bg-[#0B1120] text-slate-200' : 'bg-gray-50 text-slate-800'}`}>
+      <DotPattern darkMode={darkMode} />
 
-      {/* Navigation Bar */}
-      <nav className={`sticky top-0 z-40 border-b backdrop-blur-md ${darkMode ? 'bg-gray-900/90 border-gray-800' : 'bg-white/90 border-gray-200'}`}>
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      {/* --- DESKTOP NAVBAR --- */}
+      <nav className={`flex-none h-16 border-b backdrop-blur-xl z-30 transition-all duration-300 ${darkMode ? 'bg-[#0B1120]/80 border-white/5' : 'bg-white/80 border-gray-200/60'}`}>
+        <div className="max-w-[1600px] mx-auto px-4 lg:px-6 h-full flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setSidebarOpen(!sidebarOpen)} 
-              className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors lg:hidden"
-            >
-              {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-            <div className="flex items-center gap-2">
-              <div className="bg-blue-600 p-1.5 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-tr from-blue-600 to-indigo-600 p-2 rounded-xl shadow-lg shadow-blue-500/20">
                 <Layout className="w-5 h-5 text-white" />
               </div>
-              <span className="font-bold text-lg hidden sm:block tracking-tight">
-                {isLoading && !contentData ? "Loading..." : contentData?.title || "Loading..."}
-              </span>
-              <span className="font-bold text-lg sm:hidden tracking-tight truncate max-w-[150px]">
-                {isLoading && !contentData ? "Loading..." : contentData?.title || "Loading..."}
+              <span className={`font-bold text-lg hidden sm:block tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+                {currentContent?.title || "DevGuide"}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-             {/* Progress Widget */}
-             {!isLoading && contentData && (
-               <div className="flex items-center gap-3 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800">
-                  <span className="text-[10px] md:text-xs font-semibold text-gray-500 uppercase hidden sm:inline">Progress</span>
-                  <div className="w-16 md:w-24 h-1.5 md:h-2 bg-gray-300 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-green-500 transition-all duration-500 ease-out"
-                      style={{ width: `${progressPercentage}%` }}
-                    />
-                  </div>
-                  <span className="text-[10px] md:text-xs font-mono">{progressPercentage}%</span>
-               </div>
-             )}
+          <div className="flex items-center gap-3 md:gap-4">
+             <div className={`hidden lg:flex items-center p-1 rounded-full border ${darkMode ? 'bg-black/20 border-white/5' : 'bg-white border-gray-200'}`}>
+                <button
+                  onClick={() => setAppLanguage('english')}
+                  className={`px-3 py-1 text-xs font-semibold rounded-full transition-all duration-300 ${
+                    appLanguage === 'english' 
+                      ? (darkMode ? 'bg-gray-700 text-white shadow' : 'bg-gray-100 text-slate-900 shadow') 
+                      : 'text-gray-500 hover:text-gray-300'
+                  }`}
+                >
+                  English
+                </button>
+                <button
+                  onClick={() => setAppLanguage('hinglish')}
+                  className={`px-3 py-1 text-xs font-semibold rounded-full transition-all duration-300 ${
+                    appLanguage === 'hinglish' 
+                      ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow' 
+                      : 'text-gray-500 hover:text-gray-300'
+                  }`}
+                >
+                  Hinglish
+                </button>
+             </div>
 
-            <button onClick={() => setDarkMode(!darkMode)} className={`p-2 rounded-lg transition-all ${darkMode ? 'text-yellow-400 hover:bg-gray-800' : 'text-slate-600 hover:bg-gray-100'}`}>
-              {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            <button onClick={() => setDarkMode(!darkMode)} className={`p-2.5 rounded-full transition-all ${darkMode ? 'bg-white/5 text-yellow-400 hover:bg-white/10' : 'bg-gray-100 text-slate-600 hover:bg-gray-200'}`}>
+              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
           </div>
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto flex pt-4 lg:pt-6 px-4 gap-6 relative">
+      {/* --- MAIN LAYOUT (Flex Row) --- */}
+      <div className="flex-1 flex overflow-hidden relative max-w-[1600px] mx-auto w-full">
         
-        {/* Mobile Backdrop */}
-        {sidebarOpen && (
-          <div 
-            className="fixed inset-0 bg-black/50 z-30 lg:hidden backdrop-blur-sm transition-opacity"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-
-        {/* Sidebar */}
+        {/* --- SIDEBAR --- */}
         <aside 
           className={`
-            fixed lg:sticky top-0 lg:top-24 
-            h-full lg:h-[calc(100vh-8rem)] 
-            z-40 w-72 lg:w-72 flex-shrink-0 
-            transition-transform duration-300 ease-in-out
-            bg-white dark:bg-gray-900 lg:bg-transparent lg:dark:bg-transparent
-            ${sidebarOpen ? 'translate-x-0 shadow-2xl lg:shadow-none' : '-translate-x-full lg:translate-x-0'}
-            left-0 pt-0 border-r lg:border-none border-gray-200 dark:border-gray-800
+            absolute lg:static inset-y-0 left-0 z-40
+            w-[280px] flex-shrink-0 
+            transform transition-transform duration-300 ease-in-out
+            /* FIX 2: Added lg:translate-x-0 so it is always visible on desktop */
+            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            ${darkMode ? 'bg-[#0B1120] lg:bg-transparent border-r border-gray-800' : 'bg-white lg:bg-transparent border-r border-gray-200'}
+            lg:border-none flex flex-col h-full
           `}
         >
-          <div className={`h-full overflow-y-auto rounded-none lg:rounded-2xl border-none lg:border lg:shadow-sm p-4 ${darkMode ? 'lg:bg-gray-900 lg:border-gray-800' : 'lg:bg-white lg:border-gray-200'}`}>
-            
-            {/* Close button mobile */}
-            <div className="lg:hidden flex justify-end mb-4 pt-4">
-               <button onClick={() => setSidebarOpen(false)} className="p-2 text-gray-500">
-                 <X className="w-5 h-5" />
-               </button>
-            </div>
+           {/* Sidebar Header (Mobile Only) */}
+           <div className="lg:hidden flex items-center justify-between p-4 border-b border-white/5">
+              <span className="font-bold">Courses</span>
+              <button onClick={() => setSidebarOpen(false)}><X className="w-5 h-5" /></button>
+           </div>
 
-            {/* Course Selector */}
-            <div className="mb-6 border-b border-gray-200 dark:border-gray-800 pb-4">
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-1">Select Guide</h3>
-              <div className="space-y-1">
-                {isLoading ? (
-                   <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-500">
-                     <Loader2 className="w-4 h-4 animate-spin" />
-                     <span>Loading courses...</span>
-                   </div>
-                ) : (
-                  courses.map(course => (
-                    <button 
-                      key={course.id}
-                      onClick={() => {
-                        setActiveCourseId(course.id);
-                        setSearchQuery(''); 
-                        if (window.innerWidth < 1024) setSidebarOpen(false); 
-                      }}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-3 ${
-                        (contentData && contentData.id === course.id)
-                          ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                          : darkMode ? 'text-gray-400 hover:bg-gray-800 hover:text-gray-200' : 'text-gray-600 hover:bg-gray-100'
-                      }`}
-                    >
-                      <div className={(contentData && contentData.id === course.id) ? 'text-white' : 'text-gray-400'}>
-                        {getIconComponent(course.icon)}
-                      </div>
-                      {course.title}
-                    </button>
-                  ))
-                )}
+           <div className="flex-1 overflow-y-auto p-4 scrollbar-hide">
+              <div className="space-y-1 mb-8">
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">Modules</h3>
+                {courseList.map(course => (
+                   <button 
+                     key={course.id}
+                     onClick={() => { setActiveCourseId(course.id); if(window.innerWidth < 1024) setSidebarOpen(false); }}
+                     className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-3 ${
+                       activeCourseId === course.id 
+                       ? 'bg-blue-600/10 text-blue-500' 
+                       : darkMode ? 'text-gray-400 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:bg-gray-100'
+                     }`}
+                   >
+                     {getIconComponent(course.icon)}
+                     <span>{course.title}</span>
+                   </button>
+                ))}
               </div>
-            </div>
 
-            {!isLoading && contentData && (
-              <>
-                <div className="relative mb-6">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder={`Search ${contentData.title}...`}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className={`w-full pl-9 pr-4 py-2 text-sm rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
-                      darkMode ? 'bg-gray-800 border-gray-700 placeholder-gray-500' : 'bg-gray-50 border-gray-200'
-                    }`}
-                  />
-                </div>
-
-                <div className="space-y-6 pb-20 lg:pb-0">
-                  {filteredSections.map(section => (
-                    <div key={section.id}>
-                      <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 ml-2">
-                        {section.title}
-                      </h3>
-                      <div className="space-y-1">
-                        {section.topics.map(topic => (
-                          <button
-                            key={topic.id}
-                            onClick={() => scrollToElement(topic.id)}
-                            className={`w-full text-left px-3 py-2.5 lg:py-2 rounded-lg text-sm transition-all flex items-center justify-between group ${
-                              completedTopics.includes(topic.id) 
-                                ? 'opacity-75' 
-                                : ''
-                            } ${
-                              darkMode 
-                                ? 'hover:bg-gray-800 text-gray-300' 
-                                : 'hover:bg-gray-50 text-gray-700'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2 truncate">
-                              {completedTopics.includes(topic.id) && <CheckCircle2 className="w-3 h-3 text-green-500 shrink-0" />}
-                              <span className="truncate">{topic.title}</span>
-                            </div>
-                            {bookmarks.includes(topic.id) && <BookMarked className="w-3 h-3 text-blue-500 shrink-0" />}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                  
-                  {filteredSections.length === 0 && searchQuery && (
-                    <div className="text-center py-8 text-gray-500 text-sm">
-                      No topics found matching "{searchQuery}"
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 min-w-0 pb-20 w-full">
-          
-          {/* Loading State */}
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 className="w-12 h-12 animate-spin text-blue-600 mb-4" />
-              <p className="text-gray-500">Loading course content...</p>
-            </div>
-          ) : contentData ? (
-            <>
-              {/* Welcome Card */}
-              <div className={`rounded-2xl p-6 lg:p-8 mb-8 border relative overflow-hidden ${darkMode ? 'bg-gradient-to-br from-blue-900 to-indigo-900 border-blue-800' : 'bg-gradient-to-br from-blue-600 to-indigo-600 border-blue-500'}`}>
-                <div className="relative z-10 text-white">
-                  <div className="flex items-center gap-3 mb-2">
-                     <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
-                       {getIconComponent(contentData.icon)}
-                     </div>
-                     <h1 className="text-2xl lg:text-3xl font-bold">{contentData.title}</h1>
+              {currentContent && (
+                <div className="mb-20 lg:mb-0">
+                  <div className="relative mb-4">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
+                    <input 
+                      type="text" 
+                      placeholder="Filter topics..." 
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      className={`w-full pl-9 pr-3 py-2 text-xs rounded-lg border ${darkMode ? 'bg-black/20 border-white/10 text-white' : 'bg-white border-gray-200'} focus:outline-none focus:border-blue-500`} 
+                    />
                   </div>
-                  <p className="text-blue-100 mb-6 max-w-xl text-sm lg:text-base">{contentData.subtitle}</p>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:w-fit">
-                    {contentData.stats && contentData.stats.map((stat, i) => (
-                      <div key={i} className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/10 flex items-center sm:block gap-3 sm:gap-0">
-                        <div className="text-xl lg:text-2xl font-bold">{stat.value}</div>
-                        <div className="text-xs text-blue-200">{stat.label}</div>
+                  <div className="space-y-6">
+                    {filteredSections.map(section => (
+                      <div key={section.id}>
+                        <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 pl-2">{section.title}</h4>
+                        <div className="space-y-0.5 border-l border-gray-700/50 ml-2">
+                          {section.topics.map(topic => (
+                            <button
+                              key={topic.id}
+                              onClick={() => scrollToElement(topic.id)}
+                              className={`w-full text-left pl-3 pr-2 py-1.5 text-[12px] border-l -ml-px transition-colors block truncate ${
+                                completedTopics.includes(topic.id) ? 'text-green-500 border-green-500/50' : 'text-gray-400 hover:text-blue-400 hover:border-blue-500'
+                              }`}
+                            >
+                              {topic.title}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
-                {/* Background decoration */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl"></div>
-              </div>
+              )}
+           </div>
+        </aside>
 
-              <div className="space-y-8 lg:space-y-12">
-                {filteredSections.map(section => (
-                  <div key={section.id} id={section.id} className="scroll-mt-24">
-                    <div className="flex items-start lg:items-center gap-3 mb-4 lg:mb-6">
-                      <div className={`p-2 rounded-lg shrink-0 ${darkMode ? 'bg-gray-800' : 'bg-white shadow-sm border border-gray-100'}`}>
-                        <Layout className="w-6 h-6 text-blue-500" />
-                      </div>
-                      <div>
-                        <h2 className="text-xl lg:text-2xl font-bold">{section.title}</h2>
-                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{section.intro}</p>
-                      </div>
-                    </div>
-
-                    <div className="grid gap-4 lg:gap-6">
-                      {section.topics.map(topic => {
-                        const currentLang = activeTab[topic.id] || 'english';
-                        const isBookmarked = bookmarks.includes(topic.id);
-                        const isCompleted = completedTopics.includes(topic.id);
-
-                        return (
-                          <div 
-                            key={topic.id} 
-                            id={topic.id} 
-                            className={`rounded-xl lg:rounded-2xl border transition-all duration-300 scroll-mt-28 ${
-                              darkMode 
-                                ? 'bg-gray-900 border-gray-800 hover:border-gray-700' 
-                                : 'bg-white border-gray-200 shadow-sm hover:shadow-md'
-                            } ${isCompleted ? 'opacity-90 grayscale-[30%]' : ''}`}
-                          >
-                            {/* Card Header */}
-                            <div className="p-4 lg:p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-start">
-                              <div className="flex items-start gap-3">
-                                <button 
-                                  onClick={() => toggleComplete(topic.id)}
-                                  className={`mt-1 p-1 rounded-full border-2 shrink-0 transition-colors ${
-                                    isCompleted 
-                                      ? 'bg-green-500 border-green-500 text-white' 
-                                      : 'border-gray-300 text-transparent hover:border-green-400'
-                                  }`}
-                                >
-                                  <Check className="w-3 h-3" />
-                                </button>
-                                <h3 className={`text-lg lg:text-xl font-bold leading-tight ${isCompleted ? 'text-gray-500 line-through decoration-gray-500/50' : ''}`}>
-                                  {topic.title}
-                                </h3>
-                              </div>
-                              <div className="flex gap-2">
-                                <button 
-                                  onClick={() => toggleBookmark(topic.id)}
-                                  className={`p-2 rounded-lg transition-colors ${
-                                    isBookmarked 
-                                      ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' 
-                                      : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-                                  }`}
-                                >
-                                  <BookMarked className="w-5 h-5" />
-                                </button>
-                              </div>
-                            </div>
-
-                            <div className="p-4 lg:p-6">
-                              {/* Language Tabs */}
-                              <div className={`inline-flex p-1 rounded-lg mb-4 w-full sm:w-auto ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                                <button
-                                  onClick={() => setTopicTab(topic.id, 'english')}
-                                  className={`flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                                    currentLang === 'english'
-                                      ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white'
-                                      : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'
-                                  }`}
-                                >
-                                  🇬🇧 English
-                                </button>
-                                <button
-                                  onClick={() => setTopicTab(topic.id, 'hinglish')}
-                                  className={`flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                                    currentLang === 'hinglish'
-                                      ? 'bg-white text-indigo-600 shadow-sm dark:bg-indigo-600 dark:text-white'
-                                      : 'text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'
-                                  }`}
-                                >
-                                  🇮🇳 Hinglish
-                                </button>
-                              </div>
-
-                              {/* Explanation Content */}
-                              <div className="min-h-[60px] lg:min-h-[80px]">
-                                <p className={`text-base lg:text-lg leading-relaxed ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                                  {topic.explanations[currentLang]}
-                                </p>
-                              </div>
-
-                              {/* Code Section */}
-                              {topic.code && (
-                                <div className="mt-6">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <Terminal className="w-4 h-4 text-gray-400" />
-                                    <span className="text-sm font-medium text-gray-500">{topic.code.title}</span>
-                                  </div>
-                                  <CodeBlock code={topic.code.content} language={topic.code.language} darkMode={darkMode} />
-                                  
-                                  {/* New Code Explanation Section */}
-                                  {topic.codeExplanations && (
-                                    <div className={`mt-4 p-4 rounded-lg border-l-4 ${darkMode ? 'bg-gray-800 border-purple-500' : 'bg-blue-50 border-purple-500'}`}>
-                                      <h5 className={`text-sm font-bold mb-2 flex items-center gap-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                                         <FileCode className="w-4 h-4" />
-                                         Code Explanation ({currentLang === 'english' ? 'English' : 'Hinglish'})
-                                      </h5>
-                                      <p className={`text-sm leading-relaxed ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                                        {topic.codeExplanations[currentLang]}
-                                      </p>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-
-                              {/* Key Points */}
-                              {topic.keyPoints && (
-                                <div className={`mt-6 p-4 rounded-xl ${darkMode ? 'bg-blue-900/10 border border-blue-900/30' : 'bg-blue-50 border border-blue-100'}`}>
-                                  <h4 className={`text-sm font-bold uppercase tracking-wider mb-3 flex items-center gap-2 ${darkMode ? 'text-blue-400' : 'text-blue-700'}`}>
-                                    <GraduationCap className="w-4 h-4" />
-                                    Key Takeaways
-                                  </h4>
-                                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {topic.keyPoints.map((point, idx) => (
-                                      <li key={idx} className="flex items-start gap-2 text-sm">
-                                        <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
-                                        <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>{point}</span>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-12 text-center text-gray-500 text-sm py-8 border-t border-gray-200 dark:border-gray-800">
-                 Keep learning and building! 🚀
-              </div>
-            </>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-20 text-gray-500">
-              <p>Failed to load courses. Please check your connection and refresh.</p>
-            </div>
+        {/* --- MAIN CONTENT SCROLL AREA --- */}
+        <main className="flex-1 overflow-y-auto relative w-full scroll-smooth">
+          {sidebarOpen && (
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />
           )}
+
+          <div className="max-w-4xl mx-auto px-4 py-8 pb-32 lg:pb-12">
+            {isLoading && !currentContent ? (
+               <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+                 <Loader2 className="w-8 h-8 animate-spin mb-2" />
+                 <p>Loading Course...</p>
+               </div>
+            ) : currentContent ? (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className={`rounded-2xl p-6 sm:p-10 border mb-12 relative overflow-hidden ${darkMode ? 'bg-[#131b2e] border-white/5' : 'bg-white border-gray-200'}`}>
+                   <div className="relative z-10">
+                      <div className="flex items-center gap-2 mb-4 text-blue-500">
+                        {getIconComponent(currentContent.icon)}
+                        <span className="text-xs font-bold uppercase">{currentContent.category}</span>
+                      </div>
+                      <h1 className="text-3xl sm:text-4xl font-bold mb-4">{currentContent.title}</h1>
+                      <p className={`text-lg leading-relaxed ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{currentContent.subtitle}</p>
+                   </div>
+                   <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-blue-500/10 blur-[80px] rounded-full pointer-events-none" />
+                </div>
+
+                <div className="space-y-16">
+                  {filteredSections.map(section => (
+                    <div key={section.id} id={section.id}>
+                      <div className="flex items-center gap-4 mb-8">
+                         <span className="h-px flex-1 bg-gray-700/50"></span>
+                         <h2 className="text-xl font-bold">{section.title}</h2>
+                         <span className="h-px flex-1 bg-gray-700/50"></span>
+                      </div>
+
+                      <div className="space-y-8">
+                        {section.topics.map(topic => {
+                           const isCompleted = completedTopics.includes(topic.id);
+                           const isBookmarked = bookmarks.includes(topic.id);
+                           const explanations = topic.explanations || { english: "Coming soon" };
+                           const codeExplanations = topic.codeExplanations || {};
+
+                           return (
+                             <div key={topic.id} id={topic.id} className="group">
+                                <div className="flex justify-between items-start mb-4">
+                                   <div className="flex gap-3">
+                                      <button onClick={() => toggleComplete(topic.id)} className={`mt-1 w-5 h-5 rounded-full border flex items-center justify-center transition-all ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'border-gray-600 hover:border-green-500 text-transparent'}`}>
+                                        <Check className="w-3 h-3" />
+                                      </button>
+                                      <h3 className={`text-xl font-bold ${isCompleted ? 'text-gray-500 line-through decoration-gray-700' : ''}`}>{topic.title}</h3>
+                                   </div>
+                                   <button onClick={() => toggleBookmark(topic.id)} className={`${isBookmarked ? 'text-blue-500' : 'text-gray-600 hover:text-white'}`}><BookMarked className="w-5 h-5" /></button>
+                                </div>
+
+                                <div className={`pl-8 border-l ${darkMode ? 'border-gray-800' : 'border-gray-200'} ml-2.5 pb-8`}>
+                                   <div className={`prose max-w-none mb-6 text-base leading-7 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                      {explanations.english?.split('\n').map((p,i) => <p key={i} className="mb-3">{p}</p>)}
+                                   </div>
+
+                                   {topic.extras?.flowDiagram && (
+                                     <div className={`p-4 rounded-lg border mb-6 overflow-x-auto ${darkMode ? 'bg-[#0f141f] border-gray-800' : 'bg-gray-50 border-gray-200'}`}>
+                                        <pre className={`text-xs font-mono whitespace-pre ${darkMode ? 'text-blue-300' : 'text-blue-800'}`}>{topic.extras.flowDiagram}</pre>
+                                     </div>
+                                   )}
+
+                                   {topic.extras?.comparisonTable && <ComparisonTable data={topic.extras.comparisonTable} darkMode={darkMode} />}
+
+                                   {topic.code && (
+                                     <div className="my-6">
+                                        <CodeBlock code={topic.code.content} language={topic.code.language} darkMode={darkMode} />
+                                        {codeExplanations.english && (
+                                           <div className={`mt-3 pl-3 border-l-2 ${darkMode ? 'border-blue-500/50 text-gray-500' : 'border-blue-500 text-gray-600'} text-sm italic`}>
+                                              <span className="font-bold not-italic mr-1 text-blue-500">Note:</span> {codeExplanations.english}
+                                           </div>
+                                        )}
+                                     </div>
+                                   )}
+
+                                   {topic.keyPoints && (
+                                     <div className={`p-4 rounded-lg border-l-4 ${darkMode ? 'bg-gray-800/30 border-green-500' : 'bg-gray-50 border-green-600'}`}>
+                                        <h4 className="text-xs font-bold uppercase text-green-500 mb-2 flex items-center gap-2"><Sparkles className="w-3 h-3"/> Key Takeaways</h4>
+                                        <ul className="space-y-2">
+                                           {topic.keyPoints.map((pt, i) => (
+                                              <li key={i} className="text-sm flex gap-2">
+                                                 <span className="text-green-500">•</span> <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>{pt}</span>
+                                              </li>
+                                           ))}
+                                        </ul>
+                                     </div>
+                                   )}
+                                </div>
+                             </div>
+                           );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+            ) : null}
+          </div>
         </main>
       </div>
+
+      {/* --- FIXED MOBILE BOTTOM BAR --- */}
+      <div className={`lg:hidden fixed bottom-0 left-0 right-0 h-16 border-t backdrop-blur-xl z-50 flex items-center justify-around px-2 ${darkMode ? 'bg-[#0B1120]/90 border-white/10' : 'bg-white/90 border-gray-200'}`}>
+         
+         <button onClick={() => setSidebarOpen(true)} className="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-blue-500">
+            <Menu className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Courses</span>
+         </button>
+
+         <button 
+           onClick={() => setAppLanguage(prev => prev === 'english' ? 'hinglish' : 'english')}
+           className="flex flex-col items-center gap-1 p-2"
+         >
+           <div className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${appLanguage === 'hinglish' ? 'bg-orange-500 text-white' : 'bg-gray-700 text-gray-300'}`}>
+             {appLanguage === 'english' ? 'EN' : 'HI'}
+           </div>
+           <span className="text-[10px] font-medium text-gray-400">Language</span>
+         </button>
+
+         <button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-blue-500">
+            <Home className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Top</span>
+         </button>
+      </div>
+
     </div>
   );
 };
