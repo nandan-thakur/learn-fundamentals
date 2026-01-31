@@ -1,0 +1,1005 @@
+[
+  {
+    "id": "java-collections-framework-mastery",
+    "category": "Java",
+    "title": "Java Collections Framework Mastery",
+    "subtitle": "A deep, practical guide to the Java Collections Framework covering core interfaces, internal implementations, performance characteristics, concurrency considerations, generics, sorting, and real-world usage patterns.",
+    "icon": "☕",
+    "stats": {
+      "sections": 6,
+      "topics": 28,
+      "difficulty": "Intermediate to Advanced",
+      "estimatedHours": 24
+    },
+    "sections": [
+      {
+        "id": "section-1",
+        "title": "Java Collections Framework Overview",
+        "topics": [
+          {
+            "id": "topic-1-1",
+            "title": "Need for Java Collections Framework (JCF)",
+            "explanations": {
+              "english": "Collections Framework aane se pehle, Java developers arrays aur purani classes jaise Vector aur Hashtable pe depend karte the. Arrays mein badi problem hai ki unka size fix hota hai aur creation time pe hi declare karna padta hai, isliye dynamic resize bina manual copying ke possible nahi hai. Arrays mein high-level methods bhi nahi hote common operations jaise search, sort, ya kisi specific position pe insert karne ke liye. JCF ye sab problems solve karta hai by providing dynamic, resizable data structures with consistent, well-designed APIs. Ye unified architecture offer karta hai collections ko represent aur manipulate karne ke liye, jisse programming effort kam hota hai aur performance aur interoperability badhti hai. Framework khud memory management aur algorithm implementation ki complexity handle kar leta hai, jisse developers business logic pe focus kar sakte hain instead of low-level data structure mechanics pe."
+            },
+            "code": {
+              "title": "Arrays vs ArrayList Comparison",
+              "language": "java",
+              "content": "// Fixed-size array limitations\nString[] array = new String[5];\narray[0] = \"Apple\";\n// array[5] = \"Banana\"; // ArrayIndexOutOfBoundsException!\n\n// Manual resizing requires boilerplate code\nString[] newArray = new String[array.length * 2];\nSystem.arraycopy(array, 0, newArray, 0, array.length);\narray = newArray;\n\n// Collections Framework solution: Dynamic resizing handled automatically\nList<String> list = new ArrayList<>();\nlist.add(\"Apple\");\nlist.add(\"Banana\");\nlist.add(\"Cherry\"); // No size limitations, automatic growth\nlist.contains(\"Apple\"); // Built-in search functionality\nCollections.sort(list); // Built-in sorting algorithms"
+            },
+            "codeExplanations": {
+              "english": "Ye code dikhata hai ki manual array management aur Collections use karne mein kya farak hai. Array wala example fixed-size constraint dikhata hai aur verbose manual copying jo resize simulate karne ke liye chahiye hoti hai. Iske against, ArrayList automatically capacity expansion handle kar leta hai behind the scenes, 50% grow karti hai jab full hoti hai. Isme rich methods bhi hain jaise contains() for O(n) search aur smoothly kaam karta hai Collections.sort() ke saath elements order karne ke liye, jo framework ke productivity benefits demonstrate karta hai."
+            },
+            "keyPoints": [
+              "Arrays ka size fix hota hai aur ye dynamically grow ya shrink nahi kar sakte bina manual array copying aur new array creation ke",
+              "Collections Framework standardized, reusable data structures provide karta hai jo memory management aur resizing automatically handle kar lete hain",
+              "Collections mein built-in algorithms hain common operations ke liye (sorting, searching, reversing) jo arrays ke saath manually implement karne padte hain",
+              "Collections use karne se code maintainability improve hoti hai by providing consistent APIs across different data structure implementations"
+            ],
+            "extras": {
+              "flowDiagram": "",
+              "comparisonTable": "| Feature | Arrays | Collections Framework |\n|---------|--------|---------------------|\n| Size | Fixed | Dynamic |\n| Type Safety | Covariant | Invariant with Generics |\n| Methods | Length only | Rich API (add, remove, search) |\n| Implementations | Single | Multiple (List, Set, Map variations) |",
+              "examples": []
+            }
+          },
+          {
+            "id": "topic-1-2",
+            "title": "Collections Framework Hierarchy",
+            "explanations": {
+              "english": "Java Collections Framework ek well-designed inheritance hierarchy follow karta hai jo shuru hota hai root interface java.lang.Iterable se, jo elements pe iterate karne ki ability provide karta hai. Collection interface Iterable extend karta hai aur most collections ka foundation hai, basic operations define karta hai jaise add(), remove(), aur contains(). List, Set, aur Queue Collection ke subinterfaces hain, har ek specific use cases ke liye contract specialize karta hai. List insertion order maintain karta hai aur duplicates allow karta hai, Set prohibit karta hai duplicates ko, aur Queue FIFO principles follow karta hai. Map alag khada hai kyunki ye Collection extend nahi karta, key-value associations represent karta hai rather than individual elements. Deque (double-ended queue) Queue extend karta hai taaki both ends pe insertion aur removal allow ho sake. Ye hierarchy samajhna crucial hai taaki aap apne variables aur method parameters ke liye right abstraction level choose kar sakein."
+            },
+            "code": {
+              "title": "Hierarchy Structure Visualization",
+              "language": "java",
+              "content": "// Root of the hierarchy\nIterable<T> \n    └── Collection<T>\n            ├── List<T>          (Ordered, duplicates allowed)\n            │       ├── ArrayList\n            │       └── LinkedList\n            ├── Set<T>           (Unique elements only)\n            │       ├── HashSet\n            │       ├── LinkedHashSet\n            │       └── TreeSet\n            └── Queue<T>         (FIFO processing)\n                    ├── PriorityQueue\n                    └── Deque<T> (Double-ended)\n                            └── ArrayDeque\n\n// Separate hierarchy for key-value pairs\nMap<K, V>\n    ├── HashMap\n    ├── LinkedHashMap\n    └── TreeMap\n\n// Programming to the interface\nCollection<String> coll = new ArrayList<>();  // Flexible\nList<String> list = new ArrayList<>();        // List-specific operations\nArrayList<String> arr = new ArrayList<>();    // Concrete - avoid this"
+            },
+            "codeExplanations": {
+              "english": "Ye ASCII diagram core interfaces ke beech inheritance relationships illustrate karta hai. Collection Lists, Sets, aur Queues ka superinterface hai, jabki Map apne separate branch mein exist karta hai. Code comments best practices dikhate hain: variables declare karna using most abstract interface possible (Collection for general needs, List jab order matter karta hai) rather than concrete implementations. Ye follow karta hai principle of 'programming to an interface, not an implementation', jisse ArrayList aur LinkedList ke beech easy switching possible hoti hai bina client code change kiye."
+            },
+            "keyPoints": [
+              "Iterable root interface hai jo iterator() method provide karta hai, enhanced for-loops enable karta hai saari collections pe",
+              "Collection single-element containers (List, Set, Queue) ke liye root hai, jabki Map key-value pairs ke liye separate top-level interface hai",
+              "Deque Queue extend karta hai taaki both ends pe operations support kar sake, ye isko suitable banata hai both stack (LIFO) aur queue (FIFO) usage ke liye",
+              "Interface types (List, Set) pe programming karne se rather than concrete classes, flexible code enable hota hai jo easily implementations switch kar sakta hai"
+            ],
+            "extras": {
+              "flowDiagram": "Iterable (root)\n    |\n    v\nCollection\n    |------> List ----> ArrayList, LinkedList\n    |------> Set -----> HashSet, TreeSet\n    |------> Queue ---> PriorityQueue\n                         |\n                         v\n                       Deque ----> ArrayDeque\n\nSeparate:\nMap ----> HashMap, TreeMap, LinkedHashMap",
+              "comparisonTable": "",
+              "examples": []
+            }
+          },
+          {
+            "id": "topic-1-3",
+            "title": "Core Collection Interfaces",
+            "explanations": {
+              "english": "Collections Framework seven core interfaces ke around built hai jo specific contracts define karte hain data manipulation ke liye. Iterable provide karta hai sequential access to elements. Collection define karta hai basic operations jo saare single-value containers ke liye available hain jaise add(), remove(), aur size(). List Collection extend karta hai taaki positional access maintain ho sake aur duplicate elements allow ho sake, jisse ye ideal ban jata hai ordered sequences ke liye. Set Collection extend karta hai duplicates prohibit karne ke liye, jo crucial hai unique element storage ke liye. Queue Collection extend karta hai elements hold karne ke liye processing se pehle, typically FIFO order mein. Deque Queue extend karta hai taaki element insertion aur removal both ends pe support kar sake, stack aur queue behavior both enable karta hai. Map represent karta hai unique key-value association jahan keys form karti hain ek Set. Right interface choose karna depend karta hai ki aapko ordering chahiye (List), uniqueness chahiye (Set), processing order chahiye (Queue), ya key-based lookup chahiye (Map)."
+            },
+            "code": {
+              "title": "Interface Selection Examples",
+              "language": "java",
+              "content": "// Iterable: Anything you can iterate over\npublic void printAll(Iterable<String> items) {\n    for (String item : items) System.out.println(item);\n}\n\n// Collection: When you need to add/remove/check existence\nCollection<Integer> numbers = new HashSet<>();\nnumbers.add(42); numbers.contains(42); // Basic operations\n\n// List: When order matters and duplicates are allowed\nList<String> todoList = new ArrayList<>();\ntodoList.add(0, \"Urgent\"); // Positional insertion\nString first = todoList.get(0); // Index-based access\n\n// Set: When uniqueness is required\nSet<String> uniqueEmails = new HashSet<>();\nuniqueEmails.add(\"alice@example.com\"); // Adding duplicate returns false\n\n// Queue: FIFO processing\nQueue<Task> taskQueue = new LinkedList<>();\ntaskQueue.offer(new Task()); // enqueue\ntaskQueue.poll(); // dequeue\n\n// Deque: Double-ended operations\nDeque<String> history = new ArrayDeque<>();\nhistory.push(\"Page1\"); // Stack behavior at front\nhistory.addLast(\"Page2\"); // Queue behavior at end\n\n// Map: Key-value associations\nMap<String, User> userById = new HashMap<>();\nuserById.put(\"user-123\", new User()); // O(1) insertion\nUser user = userById.get(\"user-123\"); // O(1) lookup"
+            },
+            "codeExplanations": {
+              "english": "Ye examples dikhate hain har core interface ki specific capabilities. Iterable use hota hai method parameters ke liye taaki kuch bhi loopable accept kar sake. Collection provide karta hai most general contract jab aapko bas add aur remove karna ho elements without caring about order. List provide karta hai index-based operations jo essential hain positional access ke liye. Set automatically enforce karta hai uniqueness, false return karta hai jab duplicate add karte ho. Queue offer karta hai offer() aur poll() standard FIFO processing ke liye without exceptions. Deque provide karta hai push() aur pop() stack behavior ke liye plus addLast() queue behavior ke liye ek hi interface mein. Map fundamentally different hai, provide karta hai O(1) average-time complexity key-based insertion aur retrieval ke liye."
+            },
+            "keyPoints": [
+              "List use karo jab aapko indexed access chahiye, positional insertion chahiye, ya duplicate elements allow karne hain specific sequence mein",
+              "Set use karo jab aapko ensure karni hai uniqueness of elements aur order matter nahi karta (ya LinkedHashSet/TreeSet use karo agar order chahiye)",
+              "Queue use karo FIFO processing patterns ke liye jaise task scheduling, aur Deque jab aapko both FIFO aur LIFO capabilities chahiye",
+              "Map use karo associative arrays, caches, aur lookups ke liye jahan aapko values retrieve karni hain based on unique identifiers ya keys"
+            ],
+            "extras": {
+              "flowDiagram": "",
+              "comparisonTable": "| Interface | Allows Duplicates | Ordered | Null Elements | Key Operations |\n|-----------|------------------|---------|---------------|----------------|\n| List | Yes | Yes (index) | Yes | get(index), set(index, e) |\n| Set | No | Varies* | Depends** | add(e) (returns boolean), contains(e) |\n| Queue | Yes | Yes (FIFO) | No (usually) | offer(e), poll(), peek() |\n| Deque | Yes | Yes | No (usually) | push(e), pop(), addFirst/Last() |\n| Map | Keys: No, Values: Yes | Varies*** | Depends** | put(k,v), get(k), containsKey(k) |\n\n* HashSet: unordered, LinkedHashSet: insertion order, TreeSet: sorted\n** HashMap/HashSet: one null allowed, TreeMap/TreeSet: no nulls if natural ordering\n*** LinkedHashMap: insertion/access order, TreeMap: sorted by key",
+              "examples": []
+            }
+          },
+          {
+            "id": "topic-1-4",
+            "title": "Real-life Analogies & Code Usage",
+            "explanations": {
+              "english": "Real-world analogies abstract collection concepts ko concrete aur memorable bana deti hain. Shopping List represent karta hai List ko: items ka specific order hota hai, aap duplicates add kar sakte ho (do packets milk), aur aap unhe position se access karte ho (teesra item). Unique IDs ka Set resemble karta hai nightclub guestlist ko jahan har name exactly ek baar appear hota hai; duplicate add karne ki koshish reject ho jati hai. Task Queue mimic karta hai print queue ya drive-through line ko jahan first document jo order hota hai wahi first process hota hai (FIFO). Key-Value Lookup bilkul dictionary ya phone book jaisa hai jahan aap word (key) use karke uski definition (number) find karte ho, opposite nahi. Ye analogies directly map hoti hain software patterns mein: shopping carts (List), user ID validation (Set), job schedulers (Queue), aur database indexing (Map)."
+            },
+            "code": {
+              "title": "Real-World Collection Patterns",
+              "language": "java",
+              "content": "// Shopping List (List): Ordered, allows duplicates\nList<String> shoppingList = new ArrayList<>();\nshoppingList.add(\"Milk\");\nshoppingList.add(\"Eggs\");\nshoppingList.add(\"Milk\"); // Duplicate allowed\nString thirdItem = shoppingList.get(2); // Access by position\n\n// Unique IDs (Set): No duplicates allowed\nSet<String> usedUUIDs = new HashSet<>();\nboolean isNew = usedUUIDs.add(\"550e8400-e29b-41d4-a716-446655440000\");\nboolean isDuplicate = usedUUIDs.add(\"550e8400-e29b-41d4-a716-446655440000\"); // Returns false\n\n// Task Queue (Queue): FIFO processing\nQueue<Runnable> printQueue = new LinkedList<>();\nprintQueue.offer(() -> printDocument(\"Report.pdf\"));\nprintQueue.offer(() -> printDocument(\"Invoice.docx\"));\nRunnable nextTask = printQueue.poll(); // Removes and returns first added\n\n// Key-Value Lookup (Map): Associative array\nMap<String, Customer> customerDatabase = new HashMap<>();\ncustomerDatabase.put(\"CUST-001\", new Customer(\"Alice\"));\ncustomerDatabase.put(\"CUST-002\", new Customer(\"Bob\"));\nCustomer alice = customerDatabase.get(\"CUST-001\"); // O(1) lookup by ID"
+            },
+            "codeExplanations": {
+              "english": "Ye code examples real-world scenarios ko Java implementations mein translate karte hain. Shopping list demonstrate karta hai List ka duplicates accept karna aur index-based retrieval. UUID set dikhata hai ki add() boolean return karta hai jo indicate karta hai ki element naya tha ya nahi, useful hai duplicate detection ke liye ID generation systems mein. Print queue illustrate karta hai offer/poll pattern producer-consumer scenarios ke liye jahan tasks ko arrival order mein process karna padta hai. Finally, customer database demonstrate karta hai Map ki core value: string keys ko object references mein transform karna constant time mein, jo caching aur indexing systems ka foundation hai."
+            },
+            "keyPoints": [
+              "Shopping carts aur to-do lists List analogies hain: ordered sequences jahan duplicates ka sense banta hai aur position matter karti hai",
+              "Social security numbers, email registrations, aur passport IDs Set analogies hain: unique identifiers jahan duplicates prevent karni padti hain",
+              "Print queues, customer service lines, aur BFS algorithms Queue analogies hain: fair processing arrival order mein bina skip kiye",
+              "Dictionaries, phone books, aur database primary keys Map analogies hain: translate karna from one domain (keys) to another (values) efficiently"
+            ],
+            "extras": {
+              "flowDiagram": "",
+              "comparisonTable": "",
+              "examples": [
+                "Library book tracking (List for check-out history, Set for available genres, Map for ISBN lookup)",
+                "Browser history (Deque for back/forward navigation)",
+                "Event ticketing system (Queue for waiting list, Set for issued ticket numbers, Map for seat assignments)"
+              ]
+            }
+          },
+          {
+            "id": "topic-1-5",
+            "title": "Iterators Overview",
+            "explanations": {
+              "english": "Iterators provide karte hain standardized way collections traverse karne ka bina unka underlying structure expose kiye. Iterator interface define karta hai three core methods: hasNext() check karta hai ki aur elements hain ya nahi, next() current element retrieve karta hai aur cursor advance karta hai, aur remove() last returned element safely delete karta hai iteration ke dauran. Enhanced For-Loop (foreach) jo Java 5 mein introduce hua hai, ye syntactic sugar hai jo automatically Iterator use karta hai behind the scenes, code clean banata hai lekin iterator object chhupa deta hai. Iterator contract guarantee karta hai ki elements exactly ek baar visit hote hain collection ki defined order mein (agar hai). Simple index-based for-loops ke unlike, iterators uniformly kaam karte hain across all collection types including Sets jinme indices nahi hote. Ye provide karte hain only safe way collection modify karne ka iteration ke dauran bina ConcurrentModificationException cause kiye in single-threaded contexts."
+            },
+            "code": {
+              "title": "Iterator Patterns and Usage",
+              "language": "java",
+              "content": "// Explicit Iterator usage\nList<String> cities = Arrays.asList(\"Paris\", \"London\", \"Tokyo\");\nIterator<String> iterator = cities.iterator();\nwhile (iterator.hasNext()) {\n    String city = iterator.next();\n    if (city.startsWith(\"L\")) {\n        iterator.remove(); // Safe removal during iteration\n    }\n}\n\n// Enhanced for-loop (syntactic sugar for Iterator)\nfor (String city : cities) {\n    System.out.println(city.toUpperCase());\n    // cities.remove(city); // ConcurrentModificationException!\n}\n\n// Iterator with Map (via entrySet)\nMap<String, Integer> scores = new HashMap<>();\nscores.put(\"Alice\", 95); scores.put(\"Bob\", 87);\nIterator<Map.Entry<String, Integer>> entryIter = scores.entrySet().iterator();\nwhile (entryIter.hasNext()) {\n    Map.Entry<String, Integer> entry = entryIter.next();\n    if (entry.getValue() < 90) entryIter.remove();\n}\n\n// Iterable interface implementation\npublic class BookShelf implements Iterable<Book> {\n    private List<Book> books = new ArrayList<>();\n    \n    @Override\n    public Iterator<Book> iterator() {\n        return books.iterator();\n    }\n}\n// Usage: for (Book b : bookShelf) { ... }"
+            },
+            "codeExplanations": {
+              "english": "First example dikhata hai classic while-loop pattern explicit Iterator ke saath, crucial hai safe element removal ke liye via remove() jo ConcurrentModificationException avoid karta hai. Enhanced for-loop example demonstrate karta hai cleaner syntax lekin danger dikhata hai structural modification ka (commented out). Map example illustrate karta hai ki Maps pe iterate karne ke liye, aapko entrySet(), keySet(), ya values() collection views traverse karne padte hain. Finally, Iterable implement karna ek custom BookShelf class pe allow karta hai use enhanced for-loops mein, demonstrate karta hai ki framework kaise extension enable karta hai non-collection classes ko while maintaining consistent traversal syntax."
+            },
+            "keyPoints": [
+              "Iterator provide karta hai uniform traversal mechanism jo identically kaam karta hai across Lists, Sets, aur Queues, abstract karta hai underlying implementation details",
+              "Iterator pe remove() method only safe way hai elements delete karne ka iteration ke dauran; Collection.remove() call karna foreach loop ke andar cause karta hai ConcurrentModificationException",
+              "Enhanced for-loops automatically Iterator use karte hain lekin reference chhupate hain, remove() use karna prevent karta hai aur iteration ko read-only bana deta hai unless aap Iterator explicitly declare karein",
+              "Koi bhi class jo Iterable implement karti hai use enhanced for-loops mein use kar sakte hain, making ye pattern extensible custom data structures ke liye"
+            ],
+            "extras": {
+              "flowDiagram": "Collection\n    |\n    +-- iterator() --> Iterator\n                           |\n                           +-- hasNext() --> boolean\n                           |\n                           +-- next() --> Element\n                           |\n                           +-- remove() --> void (optional)",
+              "comparisonTable": "",
+              "examples": []
+            }
+          },
+          {
+            "id": "topic-1-6",
+            "title": "Fail-fast vs Fail-safe Iterators",
+            "explanations": {
+              "english": "Iterator behavior regarding concurrent modification do categories mein fall karta hai: fail-fast aur fail-safe. Fail-fast iterators immediately throw karte hain ConcurrentModificationException agar collection structurally modified ho (add, remove, clear) iterator create hone ke baad, except iterator ke apne remove() method ke through. Ye behavior implement hota hai by checking modification count (modCount) against expected count har operation se pehle. ArrayList, HashMap, aur HashSet use karte hain fail-fast iterators. Fail-safe iterators operate karte hain collection ke clone pe ya lock-free algorithms use karte hain, allowing concurrent modification bina exceptions ke. Ye iterate karte hain collection ke snapshot pe jaise ye exist karta tha iterator creation time pe. CopyOnWriteArrayList aur ConcurrentHashMap use karte hain fail-safe iterators. Trade-off ye hai ki fail-safe iterators real-time updates reflect nahi kar sakte aur unka higher memory overhead hota hai snapshot-based implementations ke liye."
+            },
+            "code": {
+              "title": "Fail-fast Behavior Demonstration",
+              "language": "java",
+              "content": "// FAIL-FAST EXAMPLE: ConcurrentModificationException\nList<String> list = new ArrayList<>(Arrays.asList(\"A\", \"B\", \"C\"));\nfor (String s : list) {\n    if (s.equals(\"B\")) {\n        list.remove(s); // Throws ConcurrentModificationException!\n    }\n}\n\n// Correct way to remove with fail-fast iterator\nIterator<String> iter = list.iterator();\nwhile (iter.hasNext()) {\n    String s = iter.next();\n    if (s.equals(\"B\")) {\n        iter.remove(); // OK: uses iterator's remove method\n    }\n}\n\n// FAIL-SAFE EXAMPLE: No exception, works on snapshot\nList<String> concurrentList = new CopyOnWriteArrayList<>(Arrays.asList(\"A\", \"B\", \"C\"));\nfor (String s : concurrentList) {\n    if (s.equals(\"B\")) {\n        concurrentList.remove(s); // OK: iterates over snapshot\n    }\n}\nSystem.out.println(concurrentList); // [A, C]\n\n// Fail-safe with ConcurrentHashMap (no snapshot, but segmented)\nMap<String, Integer> concurrentMap = new ConcurrentHashMap<>();\nconcurrentMap.put(\"Key1\", 1); concurrentMap.put(\"Key2\", 2);\nfor (String key : concurrentMap.keySet()) {\n    concurrentMap.put(\"Key3\", 3); // OK, may or may not appear in this iteration\n}"
+            },
+            "codeExplanations": {
+              "english": "First block demonstrate karta hai classic fail-fast trap: collection modify karna enhanced for-loop iteration ke dauran throw karta hai ConcurrentModificationException kyunki hidden iterator detect karta hai structural change. Second block dikhata hai solution: iterator ka apna remove() method use karna jo synchronize karta hai expected modification count. Third block demonstrate karta hai CopyOnWriteArrayList ka fail-safe behavior jahan iterator operate karta hai array ke copy pe jo creation time pe banaya gaya tha, allowing concurrent modification bina exceptions ke (although changes iteration ke dauran nahi dikhenge). ConcurrentHashMap example dikhata hai weakly consistent iteration jo concurrent changes reflect kar sakta hai lekin guarantee karta hai ki exceptions throw nahi honge."
+            },
+            "keyPoints": [
+              "Fail-fast iterators detect karte hain collection modifications jo iterator ke bahar kiye gaye hain aur immediately throw karte hain ConcurrentModificationException non-deterministic behavior prevent karne ke liye",
+              "Fail-safe iterators snapshots pe kaam karte hain ya weak consistency use karte hain, kabhi exceptions throw nahi karte concurrent modifications ke liye lekin potentially stale data pe iterate kar sakte hain",
+              "Standard collections (ArrayList, HashMap, HashSet) use karte hain fail-fast iterators, jabki concurrent collections (CopyOnWriteArrayList, ConcurrentHashMap) use karte hain fail-safe approaches",
+              "Only safe way elements remove karne ka iteration ke dauran fail-fast collections mein hai via Iterator.remove(), Collection.remove() nahi"
+            ],
+            "extras": {
+              "flowDiagram": "Fail-Fast:\nCreate Iterator (store modCount=2)\n    |\n    v\nnext() -> check modCount==2? Yes, proceed\n    |\n    v\nCollection.remove() -> modCount=3\n    |\n    v\nnext() -> check modCount==2? No! Throw Exception\n\nFail-Safe:\nCreate Iterator (copy array)\n    |\n    v\nIterate over copy\n    |\n    v\nCollection modified (original changes)\n    |\n    v\nIterator continues over unchanged copy",
+              "comparisonTable": "| Characteristic | Fail-Fast | Fail-Safe |\n|----------------|-----------|-----------|\n| Exception on modification | Yes (ConcurrentModificationException) | No |\n| Underlying mechanism | Modification count check | Snapshot/cloning or weak consistency |\n| Memory overhead | Low | High (for snapshots) |\n| Real-time updates visible | N/A (exception first) | No (snapshot) or weakly consistent |\n| Examples | ArrayList, HashSet, HashMap | CopyOnWriteArrayList, ConcurrentHashMap |",
+              "examples": []
+            }
+          }
+        ]
+      },
+      {
+        "id": "section-2",
+        "title": "List Implementations",
+        "topics": [
+          {
+            "id": "topic-2-1",
+            "title": "ArrayList",
+            "explanations": {
+              "english": "ArrayList sabse commonly used List implementation hai, jo ek dynamic array pe backed hai jo automatically grow karta hai jab elements add hote hain. Internally, ye maintain karta hai ek Object[] array jahan elements contiguously store hote hain memory mein. Main distinction capacity (internal array ki length, default 10) aur size (currently stored elements ki count) ke beech hai. Jab size capacity exceed kar deta hai, ArrayList create karta hai ek new array jo 1.5 times size ka hota hai aur saare elements copy kar deta hai System.arraycopy() use karke. Ye resizing operation O(n) hai lekin amortized O(1) rehta hai add operations ke liye. ArrayList provide karta hai O(1) random access via get(index) kyunki direct array indexing hoti hai, lekin O(n) insertion/removal middle mein kyunki elements shift karne padte hain. Ye synchronized nahi hai aur null elements allow karta hai."
+            },
+            "code": {
+              "title": "ArrayList Internals and Optimization",
+              "language": "java",
+              "content": "// Internal structure: transient Object[] elementData;\n// Default initial capacity: 10\nArrayList<String> list = new ArrayList<>(); // Capacity 10, size 0\n\n// Capacity vs Size demonstration\nArrayList<Integer> nums = new ArrayList<>(100); // Initial capacity 100\nnums.add(42); // size=1, capacity=100\nnums.trimToSize(); // Reduce capacity to match size (optimization)\n\n// Resizing strategy when full: int newCapacity = oldCapacity + (oldCapacity >> 1);\n// This is growth by 50% (1.5x)\n\n// Performance characteristics\nList<String> items = new ArrayList<>();\nitems.add(\"A\"); // O(1) amortized, O(n) worst case when resizing\nitems.get(0);   // O(1) - direct array access\nitems.add(0, \"B\"); // O(n) - must shift all existing elements\nitems.remove(0);   // O(n) - must shift elements left\n\n// Bulk operations are optimized\nList<String> bulk = new ArrayList<>(Arrays.asList(\"A\", \"B\", \"C\", \"D\"));\nbulk.removeIf(s -> s.startsWith(\"A\")); // Bulk remove without shifting one by one\n\n// Iteration is cache-friendly due to contiguous memory\nfor (String s : items) { /* Fast due to locality of reference */ }"
+            },
+            "codeExplanations": {
+              "english": "Ye code ArrayList ke internal mechanics reveal karta hai. Integer accept karta hai constructor jo initial capacity set karta hai, useful hai jab aapko size advance mein pata ho taaki resize avoid ho sake. trimToSize() memory optimize karta hai excess capacity release karke. Comment newCapacity ke baare mein batata hai ki bitwise shift operation kaise 1.5x growth achieve karta hai. Performance examples contrast karte hain O(1) append end pe versus O(n) insertion beginning mein due to element shifting. removeIf example demonstrate karta hai bulk optimization jahan array single pass mein filter hota hai minimal copying operations ke saath, jo manual iteration aur removal se zyada efficient hai."
+            },
+            "keyPoints": [
+              "ArrayList dynamic Object[] array use karta hai internally, 50% (1.5 se multiply) grow karta hai jab capacity exceed hoti hai, O(n) element copying chahiye hoti hai resize ke dauran",
+              "Random access by index O(1) hai due to direct array pointer arithmetic, making ArrayList ideal scenarios ke liye jahan frequent reads hain aur kam insertions/deletions",
+              "Insertion ya removal arbitrary positions pe require karta hai elements left ya right shift karna, resulting in O(n) time complexity for these operations",
+              "ArrayList maintain karta hai insertion order, allow karta hai null elements aur duplicates, aur thread-safe nahi hai (external synchronization required hota hai concurrent access ke liye)"
+            ],
+            "extras": {
+              "flowDiagram": "Add element:\n  size < capacity?\n    YES -> Add to array[size], increment size\n    NO  -> Calculate new capacity (old * 1.5)\n           Create new array\n           System.arraycopy(old, 0, new, 0, size)\n           Add element\n           Update reference\n\nGet element:\n  Check bounds\n  Return elementData[index] // Direct access",
+              "comparisonTable": "",
+              "examples": []
+            }
+          },
+          {
+            "id": "topic-2-2",
+            "title": "Multidimensional Lists",
+            "explanations": {
+              "english": "Multidimensional Lists Java mein implement hote hain as Lists containing other Lists, rather than true multidimensional arrays. Sabse common form hai List<List<T>>, jo 2D structure represent karta hai jahan har row ki apni length ho sakti hai (jagged arrays). Primitive arrays int[][] ke unlike, List<List<Integer>> allow karta hai dynamic row insertion aur varying column sizes. Lekin is flexibility ki cost hai: har inner List ek separate object hai apne header ke saath, aur generics prevent karte hain primitives direct store karna (autoboxing chahiye). Common pitfalls mein include shallow copying jahan ek row modify karne se multiple entries affect hote hain, aur initialization traps jahan get(0).add() throw karta hai NullPointerException agar rows initialize nahi hue hain. 3D structures ke liye, List<List<List<T>>> create karta hai deeply nested hierarchies spatial data ya tic-tac-toe games ke liye suitable."
+            },
+            "code": {
+              "title": "2D and 3D List Patterns",
+              "language": "java",
+              "content": "// 2D List (Jagged array structure)\nList<List<Integer>> matrix = new ArrayList<>();\n// Initialize rows separately\nfor (int i = 0; i < 3; i++) {\n    matrix.add(new ArrayList<>()); // Each row is independent\n}\nmatrix.get(0).add(1); // Row 0 has 1 column\nmatrix.get(0).add(2); // Row 0 now has 2 columns\nmatrix.get(1).add(9); // Row 1 has only 1 column (jagged)\n\n// Common PITFALL: Shallow copy problem\nList<List<String>> grid = new ArrayList<>();\nList<String> sharedRow = new ArrayList<>();\ngrid.add(sharedRow);\ngrid.add(sharedRow); // Same reference added twice!\ngrid.get(0).add(\"X\");\nSystem.out.println(grid.get(1)); // [\"X\"] - Unexpected!\n\n// CORRECT: Deep initialization\nList<List<String>> board = new ArrayList<>();\nfor (int i = 0; i < 3; i++) {\n    List<String> row = new ArrayList<>(Collections.nCopies(3, \"-\"));\n    board.add(row);\n}\n\n// 3D List (e.g., 3D grid or cube)\nList<List<List<String>>> cube = new ArrayList<>();\nfor (int x = 0; x < 2; x++) {\n    List<List<String>> layer = new ArrayList<>();\n    for (int y = 0; y < 2; y++) {\n        layer.add(new ArrayList<>(Arrays.asList(\"A\", \"B\")));\n    }\n    cube.add(layer);\n}\n\n// Access: cube.get(x).get(y).get(z)\nString value = cube.get(0).get(1).get(0); // \"A\""
+            },
+            "codeExplanations": {
+              "english": "Examples demonstrate karte hain critical concepts multidimensional Lists ke liye. First block dikhata hai jagged arrays jahan row lengths differ karti hain. Shallow copy pitfall crucial hai: same List reference do baar add karne se dono grid positions identical data pe point karte hain, toh ek modify karne se doosra bhi affect hota hai. Corrected version dikhata hai proper deep initialization jahan har row new ArrayList instance hai. Board example use karta hai Collections.nCopies() rows efficiently pre-fill karne ke liye. 3D cube example illustrate karta hai spatial data structures, requiring three levels of nesting careful initialization ke saath taaki null pointer exceptions avoid ho sakein jab deep elements access karte hain."
+            },
+            "keyPoints": [
+              "Multidimensional Lists Lists of Lists hain (List<List<T>>), jagged structures allow karte hain jahan har row ki different length ho sakti hai, rectangular primitive arrays ke unlike",
+              "Inner Lists initialize karna requires explicit loops; fail karna rows initialize karne se before calling get(row).add(col) result karta hai IndexOutOfBoundsException ya NullPointerException",
+              "Same inner List reference multiple outer positions pe add karna create karta hai aliasing bugs jahan ek position modify karne se others unexpectedly affect hote hain",
+              "Autoboxing overhead apply hota hai primitive wrappers pe (Integer instead of int), aur each inner List object header overhead carry karta hai, making multidimensional Lists less memory-efficient than primitive arrays"
+            ],
+            "extras": {
+              "flowDiagram": "",
+              "comparisonTable": "| Aspect | int[][] (primitive) | List<List<Integer>> (object) |\n|--------|---------------------|------------------------------|\n| Rectangular | Fixed | Can be jagged (row lengths vary) |\n| Memory | Contiguous, compact | Scattered, headers per row |\n| Primitives | Yes (no boxing) | No (Integer autoboxing) |\n| Size changes | Fixed after creation | Dynamic rows and columns |\n| Performance | Cache-friendly | Pointer chasing overhead |",
+              "examples": [
+                "Spreadsheet application: List<List<Cell>> jahan rows vary karti hain length mein",
+                "Adjacency list graph: List<List<Edge>> jahan each vertex ke different connection counts hain",
+                "3D voxel game: List<List<List<Block>>> for spatial chunk data"
+              ]
+            }
+          },
+          {
+            "id": "topic-2-3",
+            "title": "LinkedList",
+            "explanations": {
+              "english": "LinkedList implement karta hai both List aur Deque interfaces using doubly-linked list structure jahan har element (node) data plus references contain karta hai both next aur previous nodes ke liye. ArrayList ke unlike, ye backing array use nahi karta; instead, ye references maintain karta hai first (head) aur last (tail) nodes ke liye. Ye structure provide karta hai O(1) insertion aur deletion dono ends pe aur known positions pe, lekin O(n) random access kyunki head ya tail se traverse karna padta hai index pe pahunchne ke liye. LinkedList ideal hai queue aur stack implementations ke liye due to iski Deque capabilities (addFirst, addLast, removeFirst, removeLast). Har node ArrayList ke simple array storage ke comparison mein zyada memory consume karta hai due to overhead of two reference pointers per element. Cache locality poor hai arrays ke comparison mein kyunki nodes scattered hote hain heap memory mein."
+            },
+            "code": {
+              "title": "LinkedList Node Structure and Operations",
+              "language": "java",
+              "content": "// Internal Node structure (simplified):\n// private static class Node<E> {\n//     E item;\n//     Node<E> next;\n//     Node<E> prev;\n// }\n\nLinkedList<String> list = new LinkedList<>();\n\n// O(1) operations at ends (Queue/Stack behavior)\nlist.addFirst(\"First\"); // Push to stack / Head of queue\nlist.addLast(\"Last\");   // Enqueue / Append\nString first = list.removeFirst(); // Pop / Dequeue\nString last = list.removeLast();\n\n// ListIterator for efficient bidirectional traversal\nListIterator<String> iter = list.listIterator();\nwhile (iter.hasNext()) {\n    String s = iter.next();\n    if (s.equals(\"target\")) {\n        iter.remove(); // O(1) if at current position\n        iter.add(\"replacement\"); // O(1) at cursor position\n    }\n}\n\n// Descending iterator (from tail to head)\nIterator<String> desc = list.descendingIterator();\n\n// Performance trap: indexed access is O(n)\nlist.get(0);   // O(1) - optimized to return first\nlist.get(500); // O(n) - traverses 500 nodes from head or tail\nlist.get(list.size() / 2); // O(n) - worst case, traverses n/2 nodes\n\n// Better: use iterator for sequential access\nfor (String s : list) { /* O(n) total, O(1) per step */ }"
+            },
+            "codeExplanations": {
+              "english": "Code demonstrate karta hai LinkedList ki dual nature as both List aur Deque. addFirst/addLast methods constant time mein operate karte hain by adjusting head/tail pointers, making it perfect for FIFO queues aur LIFO stacks. ListIterator crucial hai efficient modification ke liye iteration ke dauran; ArrayList ke unlike jo shifting require karta hai, LinkedList simply adjust karta hai pointer references (next.prev aur prev.next) O(1) mein jab remove karta hai via iterator. descendingIterator() efficiently traverse karta hai backward from tail. Critical performance note dikhata hai ki get(index) deceptively expensive hai: LinkedList optimize karke shorter path choose karta hai (head ya tail), lekin middle elements phir bhi O(n/2) traversal require karte hain, making indexed for-loops on LinkedList ek O(n²) anti-pattern."
+            },
+            "keyPoints": [
+              "LinkedList maintain karta hai doubly-linked nodes next aur previous references ke saath, allow karta hai O(1) insertion aur removal dono ends pe aur cursor positions pe",
+              "Random access by index (get(index)) require karta hai nearest end se traverse karna, resulting in O(n) complexity, making LinkedList unsuitable frequent indexed access patterns ke liye",
+              "Deque interface implement karta hai, provide karta hai push(), pop(), offer(), poll() methods stack aur queue operations ke liye ArrayList se better performance ke saath for these use cases",
+              "Higher memory overhead per element ArrayList ke comparison mein (headers for nodes plus two reference pointers), aur poor CPU cache locality due to scattered heap allocation"
+            ],
+            "extras": {
+              "flowDiagram": "Doubly Linked List Structure:\n[Header] <--prev-- [Node A: \"Hello\"] --next--> [Node B: \"World\"] --next--> [Node C: \"!\"] --> null\n            <--------------------------------prev-----------------------------\n\nInsert at head:\n1. Create newNode\n2. newNode.next = oldHead\n3. oldHead.prev = newNode\n4. head = newNode\n\nRemove from middle (via iterator):\n1. node.prev.next = node.next\n2. node.next.prev = node.prev\n3. Clear node references (help GC)",
+              "comparisonTable": "",
+              "examples": []
+            }
+          },
+          {
+            "id": "topic-2-4",
+            "title": "Legacy List Classes",
+            "explanations": {
+              "english": "Vector aur Stack legacy collections hain Java 1.0 se jo Collections Framework se pehle ke hain. Vector essentially thread-safe ArrayList hai, synchronizing every method individually using intrinsic lock (synchronized keyword). Jabki ye thread safety guarantee karta hai, ye poor concurrency performance provide karta hai kyunki only one thread read ya write kar sakta hai ek time pe, even independent operations ke liye. Stack extend karta hai Vector ko LIFO stack operations implement karne ke liye (push, pop, peek) lekin inherit karta hai Vector ka synchronization overhead aur incorrect inheritance (Stack is-a Vector violates Liskov Substitution Principle). Dono classes deprecated maane jaate hain new code ke liye. Vector replace ho chuka hai ArrayList se (unsynchronized, faster) ya CopyOnWriteArrayList/concurrent wrappers se thread safety ke liye. Stack replace ho chuka hai Deque implementations jaise ArrayDeque se jo superior performance aur cleaner semantics provide karte hain bina synchronization overhead ke."
+            },
+            "code": {
+              "title": "Legacy Classes and Modern Replacements",
+              "language": "java",
+              "content": "// LEGACY: Vector - synchronized methods, poor concurrency\nVector<String> vector = new Vector<>();\nvector.add(\"item\"); // Synchronized, single lock for whole collection\nvector.get(0);      // Also synchronized - contention even for reads\n\n// MODERN: ArrayList with external synchronization when needed\nList<String> arrayList = new ArrayList<>();\n// Or for thread-safe alternative with better concurrency:\nList<String> copyOnWrite = new CopyOnWriteArrayList<>(); // Lock-free reads\n\n// LEGACY: Stack extends Vector (inheritance abuse)\nStack<String> stack = new Stack<>();\nstack.push(\"first\");\nstack.push(\"second\");\nString top = stack.pop(); // \"second\" - LIFO\nint pos = stack.search(\"first\"); // Returns 1-based position from top (slow O(n))\n\n// MODERN: Deque as Stack replacement - faster, cleaner\nDeque<String> modernStack = new ArrayDeque<>();\nmodernStack.push(\"first\");  // Equivalent to addFirst\nmodernStack.push(\"second\");\ntop = modernStack.pop();    // Equivalent to removeFirst\n\n// Why Stack.search() is terrible:\n// It uses indexOf which is synchronized and O(n)\n// Deque has no search because you shouldn't search stacks (violates LIFO)\n\n// Vector enumeration (legacy iteration)\nEnumeration<String> e = vector.elements();\nwhile (e.hasMoreElements()) {\n    String s = e.nextElement(); // Legacy pattern, replaced by Iterator\n}"
+            },
+            "codeExplanations": {
+              "english": "Ye code contrast karta hai legacy aur modern approaches ko. Vector ke synchronized methods ka matlab hai har operation acquire karta hai ek monitor lock, bottlenecks create karta hai multi-threaded environments mein. CopyOnWriteArrayList alternative provide karta hai thread-safe iteration bina locking reads ke cost pe copy-on-write for modifications. Stack example demonstrate karta hai iski awkward inheritance from Vector, expose karta hai methods jaise get(index) aur insertElementAt() jo stack semantics violate karte hain (aap randomly stack elements access nahi kar sakte). ArrayDeque as Stack replacement restrict karta hai operations proper LIFO methods pe (push/pop at head only) aur eliminate karta hai synchronization overhead. Enumeration example dikhata hai legacy iteration pattern jo Iterator se replace ho chuka hai modern code mein."
+            },
+            "keyPoints": [
+              "Vector synchronize karta hai every method pe intrinsic locks use karke, resulting in coarse-grained locking jo scalability limit karta hai compared to unsynchronized ArrayList ya concurrent alternatives",
+              "Stack ka inheritance from Vector ek design flaw hai jo vector operations expose karta hai jo stack semantics violate karte hain; modern Deque implementations provide proper encapsulation",
+              "Dono Vector aur Stack exist karte hain backward compatibility ke liye only; new code mein ArrayList use karna chahiye (List ke liye) aur ArrayDeque (Stack/Queue ke liye) instead",
+              "Enumeration legacy iteration interface hai jo Iterator se replace ho chuka hai; Vector.elements() return karta hai Enumeration jabki modern collections use karte hain iterator()"
+            ],
+            "extras": {
+              "flowDiagram": "",
+              "comparisonTable": "| Feature | Vector | ArrayList | Stack | ArrayDeque |\n|---------|--------|-----------|-------|------------|\n| Thread-safe | Yes (synchronized) | No | Yes (inherited) | No |\n| Performance | Poor (locking) | Excellent | Poor | Excellent |\n| Resize factor | 2x (doubling) | 1.5x | 2x | 2x |\n| Stack ops | No | No | Yes (inheritance) | Yes (proper) |\n| Null elements | Yes | Yes | Yes | No (prohibited) |",
+              "examples": []
+            }
+          },
+          {
+            "id": "topic-2-5",
+            "title": "ArrayList vs LinkedList",
+            "explanations": {
+              "english": "ArrayList aur LinkedList ke beech choose karna require karta hai unke fundamental performance trade-offs samajhna. ArrayList use karta hai contiguous memory jo excellent CPU cache locality provide karta hai aur O(1) random access, lekin suffer karta hai O(n) insertions middle mein due to element shifting. LinkedList use karta hai scattered nodes poor cache locality ke saath aur O(n) random access, lekin offer karta hai O(1) insertion known positions pe. Memory-wise, ArrayList store karta hai sirf object references (4-8 bytes each) jabki LinkedList add karta hai two reference pointers per node plus object header overhead (typically 24+ bytes per element 64-bit JVM pe). Most scenarios mein, ArrayList preferred hai due to cache efficiency jo sequential access fast banata hai despite theoretical time complexity equivalence. LinkedList excel karta hai sirf jab frequently adding/removing dono ends pe (queue behavior) ya jab ListIterator use kar rahe hain in-place modifications ke liye. Modern JVM optimizations often make ArrayList faster than LinkedList even algorithms mein jo theoretically linked structures ko favor karte hain."
+            },
+            "code": {
+              "title": "Performance Comparison and Selection Criteria",
+              "language": "java",
+              "content": "// Benchmark considerations (conceptual)\n\n// Scenario 1: Frequent random access\nList<String> randomAccess = new ArrayList<>(); // O(1) per access\nfor (int i = 0; i < list.size(); i++) {\n    process(list.get(i)); // ArrayList: fast, LinkedList: O(n²) disaster\n}\n\n// Scenario 2: Frequent insertions at ends\nList<String> queueLike = new LinkedList<>(); // O(1) at ends\n// Actually ArrayDeque is better for pure queue, but LinkedList works\n\n// Scenario 3: Frequent insertions in middle with iterator\nList<String> editor = new LinkedList<>(loadData()); // Text editor scenario\nListIterator<String> cursor = editor.listIterator(editor.size()/2);\ncursor.add(\"inserted\"); // O(1) in LinkedList, O(n) in ArrayList (half must shift)\ncursor.remove(); // O(1) in LinkedList\n\n// Memory footprint calculation (64-bit JVM, compressed oops):\n// ArrayList: 4 bytes per reference + 12 byte header = ~16 bytes per slot\n// LinkedList: 24 byte object header + 4 item ref + 4 next + 4 prev = ~40 bytes per node\n\n// Hybrid approach: Large datasets with batch insertions\nList<String> hybrid = new ArrayList<>();\n// Add to LinkedList temporarily if many middle insertions needed,\n// then new ArrayList<>(linkedList) to convert when done\n\n// Modern JVM reality:\n// Despite O(n) insertion, ArrayList often outperforms LinkedList \n// for small-to-medium lists due to cache locality and reduced GC pressure"
+            },
+            "codeExplanations": {
+              "english": "Code illustrate karta hai decision-making scenarios. First loop dikhata hai ek O(n²) anti-pattern with LinkedList: indexed for-loops har get(i) pe head se traversal cause karta hai. LinkedList scenario demonstrate karta hai jahan ye truly shine karta hai: ListIterator use karke cursor position pe insert karna O(1) time mein, ideal hai text editors ya frequent middle insertions ke liye. Memory calculation highlight karta hai LinkedList ka ~2.5x memory overhead per element due to node object headers aur pointer fields. Hybrid approach suggest karta hai LinkedList use karna heavy modification phases ke liye then convert to ArrayList read-heavy phases ke liye. Final comment acknowledge karta hai ki modern CPU caches aur JVM optimizations often make ArrayList faster in practice unless working with very large datasets ya specific access patterns."
+            },
+            "keyPoints": [
+              "ArrayList provide karta hai O(1) random access aur better cache locality, making it faster read-heavy operations aur sequential access ke liye despite equivalent theoretical Big-O for some operations",
+              "LinkedList provide karta hai O(1) insertion aur deletion iterator positions pe aur dono ends pe, lekin require karta hai O(n) random access ke liye aur significant memory overhead hai per element",
+              "ArrayList consume karta hai less memory per element (reference only) compared to LinkedList (node object with two additional pointers plus header overhead)",
+              "Default choice hona chahiye ArrayList unless profiling prove karta hai LinkedList superior hai aapke specific access pattern ke liye involving frequent middle insertions ya queue-like behavior"
+            ],
+            "extras": {
+              "flowDiagram": "",
+              "comparisonTable": "| Operation | ArrayList | LinkedList | Winner |\n|-----------|-----------|------------|--------|\n| get(index) | O(1) | O(n) | ArrayList |\n| add(end) | O(1)* | O(1) | Tie |\n| add(middle) | O(n) | O(n)** | Depends |\n| remove(middle) | O(n) | O(n)** | LinkedList with iterator |\n| Memory/element | ~4-8 bytes | ~24-40 bytes | ArrayList |\n| Cache locality | Excellent | Poor | ArrayList |\n\n* Amortized ** O(1) with iterator, O(n) without",
+              "examples": [
+                "Text editor buffer: LinkedList with ListIterator for cursor operations",
+                "Financial tick data: ArrayList for time-series analysis with mostly reads",
+                "Undo history: LinkedList as Deque for push/pop at front"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "section-3",
+        "title": "Set & Queue Implementations",
+        "topics": [
+          {
+            "id": "topic-3-1",
+            "title": "HashSet",
+            "explanations": {
+              "english": "HashSet sabse commonly used Set implementation hai, jo HashMap pe backed hai jahan elements ko keys ke roop mein store kiya jata hai ek dummy value ke saath. Ye provide karta hai O(1) average time complexity add, remove, aur contains operations ke liye, assuming good hash function aur sufficient capacity. HashSet maintain nahi karta insertion order; iteration order random appear hota hai aur change ho sakta hai jab set resize hota hai. Implementation heavily rely karta hai stored objects ke hashCode() aur equals() contracts pe. Agar do objects equal hain equals() ke according, toh unka same hashCode() hona chahiye taaki duplicates ke roop mein recognize ho sakein. Hash collisions handle hote hain linked lists use karke (treeified to balanced trees jab chains 8 elements exceed karte hain Java 8+ mein). Load factor (default 0.75) determine karta hai kab internal hash table resize kare performance maintain karne ke liye."
+            },
+            "code": {
+              "title": "HashSet Mechanics and Contracts",
+              "language": "java",
+              "content": "// Internal implementation: HashMap<E, Object> with dummy PRESENT value\nHashSet<String> set = new HashSet<>();\n\n// hashCode() and equals() contract demonstration\npublic class Person {\n    private String id;\n    \n    @Override\n    public boolean equals(Object o) {\n        if (this == o) return true;\n        if (o == null || getClass() != o.getClass()) return false;\n        Person person = (Person) o;\n        return Objects.equals(id, person.id);\n    }\n    \n    @Override\n    public int hashCode() {\n        return Objects.hash(id); // Critical: equal objects must have equal hashCodes\n    }\n}\n\n// Performance depends on capacity and load factor\nHashSet<Integer> optimized = new HashSet<>(1000, 0.8f);\n// Initial capacity 1000, resize when 80% full (default is 75%)\n\n// O(1) operations\nset.add(\"Apple\");     // Hash to bucket, check equals() for collisions\nset.contains(\"Apple\"); // Hash lookup, O(1) average\nset.remove(\"Apple\");  // O(1) average\n\n// Collision handling (internal):\n// If hashCode collides, equals() checks if truly equal\n// In Java 8+: buckets with >8 entries convert from LinkedList to TreeMap (O(log n))\n\n// Null handling\nset.add(null); // HashSet allows one null element (stored in bucket 0)"
+            },
+            "codeExplanations": {
+              "english": "Ye code HashSet ki HashMap backing store reveal karta hai jahan elements keys ka kaam karte hain static dummy Object value ke liye. Person class demonstrate karta hai critical contract: equals() logical equality check karta hai jabki hashCode() consistent hona chahiye equals() ke saath. Objects.hash() use karna ensure karta hai ki equals() mein checked fields hash code mein contribute karte hain. Optimized constructor dikhata hai capacity aur load factor tuning expensive resizing prevent karne ke liye. Java 8+ treeification ke comment explain karta hai performance degradation resistance: jab buckets large grow hote hain due to poor hash distribution, ye convert hote hain linked lists (O(n) search) se balanced trees (O(log n) search) mein taaki performance maintain rahe even under hash collision attacks."
+            },
+            "keyPoints": [
+              "HashSet HashMap se backed hai elements ko keys use karke dummy values ke liye, provide karta hai O(1) average time for add, remove, aur contains operations",
+              "Proper implementation of hashCode() aur equals() mandatory hai: equal objects must produce equal hash codes taaki duplicates correctly recognize ho sakein aur store ho sakein",
+              "HashSet guarantee nahi karta iteration order; order random appear hota hai aur change hota hai jab internal table resize hota hai elements add hone pe",
+              "Java 8 mein treeification introduce hui: bahut saare collisions waale buckets convert hote hain linked lists se balanced trees mein taaki O(n) degradation prevent ho sakhe pathological cases mein"
+            ],
+            "extras": {
+              "flowDiagram": "Add element \"Apple\":\n  1. Calculate hashCode(\"Apple\") -> 12345\n  2. Determine bucket index: hash & (capacity-1) -> index 5\n  3. Check bucket 5:\n     - Empty? Store new node\n     - Occupied? equals() check each entry in chain\n       - Equal found? Replace (Set behavior: no duplicates)\n       - Not equal? Append to chain (collision)\n  4. If chain length > 8, convert to TreeNode",
+              "comparisonTable": "",
+              "examples": []
+            }
+          },
+          {
+            "id": "topic-3-2",
+            "title": "LinkedHashSet",
+            "explanations": {
+              "english": "LinkedHashSet combine karta hai HashSet ke O(1) performance characteristics with LinkedHashMap ki doubly-linked list taaki predictable iteration order maintain ho sake. HashSet ke random iteration order ke unlike, LinkedHashSet iterate karta hai elements insertion order mein by default (jis order mein elements pehli baar add hue the). Optionally, ye access order mode mein operate kar sakta hai jahan kisi element ko access karne se wo end mein move ho jata hai, useful hai LRU (Least Recently Used) caches ke liye. Implementation maintain karta hai doubly-linked list saare entries ke through in addition to hash table, thodi memory overhead add karta hai (do extra pointers per element) lekin constant-time operations preserve karta hai. Ye make karta hai LinkedHashSet ko ideal jab aapko uniqueness guarantees plus stable iteration order chahiye, jaise jab results return karte hain users ko jo consistent ordering expect karte hain ya jab cache eviction policies implement karte hain."
+            },
+            "code": {
+              "title": "LinkedHashSet Ordering and LRU Cache",
+              "language": "java",
+              "content": "// Insertion order preservation (default)\nLinkedHashSet<String> insertionOrder = new LinkedHashSet<>();\ninsertionOrder.add(\"First\");\ninsertionOrder.add(\"Second\");\ninsertionOrder.add(\"Third\");\ninsertionOrder.add(\"First\"); // Duplicate, ignored\nfor (String s : insertionOrder) {\n    System.out.println(s); // First, Second, Third (insertion order)\n}\n\n// Access order mode (for LRU Cache implementation)\nLinkedHashSet<String> accessOrder = new LinkedHashSet<>(16, 0.75f, true);\naccessOrder.add(\"A\");\naccessOrder.add(\"B\");\naccessOrder.add(\"C\");\naccessOrder.contains(\"A\"); // Accessing A moves it to end\naccessOrder.add(\"D\");      // New additions go to end\n// Iteration order: B, C, A, D (least recently accessed first)\n\n// LRU Cache implementation using LinkedHashMap (similar principle)\nclass LRUCache<K, V> extends LinkedHashMap<K, V> {\n    private final int capacity;\n    \n    public LRUCache(int capacity) {\n        super(capacity, 0.75f, true); // true = access order\n        this.capacity = capacity;\n    }\n    \n    @Override\n    protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {\n        return size() > capacity; // Remove oldest when exceeding capacity\n    }\n}\n\n// Performance comparison\nLinkedHashSet<String> lhs = new LinkedHashSet<>();\nlhs.add(\"item\");      // O(1) - hash + link to tail\nlhs.contains(\"item\"); // O(1) - hash lookup (O(1) extra to maintain links if access-order)\nlhs.remove(\"item\");   // O(1) - hash lookup + unlink from list"
+            },
+            "codeExplanations": {
+              "english": "First example demonstrate karta hai insertion order preservation: despite \"First\" do baar add karna, wo apni original position pe appear hota hai. Second example dikhata hai access-order mode third constructor parameter (true) se activate hota hai, jahan elements access karne se wo linked list ke end mein move hote hain. Ye behavior enable karta hai LRUCache implementation jo agle dikhaya gaya hai: LinkedHashMap extend karke aur removeEldestEntry() override karke (jo LinkedHashSet ke ordering mechanics share karta hai), cache automatically evict karta hai least-recently-used item jab size capacity exceed karta hai. Ye create karta hai zero-configuration LRU cache O(1) operations ke saath. Final comment note karta hai important stability property: HashSet ke unlike jiski iteration order completely change hoti hai resize pe, LinkedHashMap ki linked list consistent order maintain karti hai even jab underlying hash table restructure hota hai."
+            },
+            "keyPoints": [
+              "LinkedHashSet maintain karta hai doubly-linked list saare elements ke through in addition to hash table, provide karta hai O(1) operations while preserving insertion ya access order",
+              "Default iteration order insertion order hai (elements appear jis order mein pehli baar add hue the), HashSet ke unpredictable ordering ke unlike",
+              "Access-order mode (constructor parameter true) move karta hai accessed elements ko end pe, enable karta hai LRU cache implementations jahan least recently used items pehle appear hote hain",
+              "Memory overhead HashSet se zyada hai due to maintaining before/after pointers for linked list, but time complexity O(1) rehti hai saare operations ke liye"
+            ],
+            "extras": {
+              "flowDiagram": "LinkedHashSet Structure:\n[Hash Table Buckets]\n  |\n  +--> Node A <--> Node B <--> Node C (Doubly-linked list)\n         ^                           ^\n         |                           |\n       Head                        Tail\n\nInsertion Order:\nNew element always linked at tail\n\nAccess Order (if enabled):\nAccessed node unlinked from current position and relinked at tail",
+              "comparisonTable": "",
+              "examples": [
+                "Maintaining unique database records in query result order",
+                "Browser history tracking with unique URLs preserving visit order",
+                "LRU cache for image thumbnails where oldest accessed images are evicted first"
+              ]
+            }
+          },
+          {
+            "id": "topic-3-3",
+            "title": "TreeSet",
+            "explanations": {
+              "english": "TreeSet implement karta hai NavigableSet interface using Red-Black tree (self-balancing binary search tree) structure. Hash-based sets ke unlike, TreeSet guarantee karta hai O(log n) time for add, remove, aur contains operations while maintaining elements sorted order mein. Elements must implement Comparable ya construction pe Comparator provide karna chahiye; otherwise ClassCastException occur hota hai insertion pe. TreeSet prohibit karta hai null elements (kyunki compareTo(null) throw karta hai NullPointerException). NavigableSet interface provide karta hai powerful navigation methods: lower(), floor(), ceiling(), higher() kisi value ke relative elements find karne ke liye, aur descendingSet() reverse iteration ke liye. TreeSet ideal hai jab aapko range queries chahiye, sorted data chahiye, ya nearest-match searches jo hash-based sets provide nahi kar sakte. Internal Red-Black tree ensure karta hai ki tree balanced rahe insertions aur deletions ke baad, guaranteeing logarithmic performance bounds."
+            },
+            "code": {
+              "title": "TreeSet Ordering and Navigation",
+              "language": "java",
+              "content": "// Natural ordering (elements must implement Comparable)\nTreeSet<Integer> sorted = new TreeSet<>();\nsorted.add(50);\nsorted.add(20);\nsorted.add(80);\nSystem.out.println(sorted); // [20, 50, 80] - automatically sorted\n\n// Custom ordering with Comparator\nTreeSet<String> byLength = new TreeSet<>(\n    Comparator.comparingInt(String::length)\n              .thenComparing(Comparator.naturalOrder())\n);\nbyLength.add(\"Apple\");\nbyLength.add(\"Pie\");\nbyLength.add(\"Banana\");\n// Order: Pie (3), Apple (5), Banana (6)\n\n// NavigableSet operations - finding nearest matches\nTreeSet<Integer> scores = new TreeSet<>(Arrays.asList(10, 20, 30, 40, 50));\nInteger lower = scores.lower(30);      // 20 (strictly less)\nInteger floor = scores.floor(30);      // 30 (less than or equal)\nInteger ceiling = scores.ceiling(45);  // 50 (greater than or equal)\nInteger higher = scores.higher(30);    // 40 (strictly greater)\n\n// Range operations (subsets)\nNavigableSet<Integer> sub = scores.subSet(20, true, 40, true); // [20, 30, 40]\nNavigableSet<Integer> tail = scores.tailSet(30, false); // (30, 50] -> 40, 50\nNavigableSet<Integer> head = scores.headSet(30, true);  // [10, 20, 30]\n\n// Polling operations (retrieve and remove)\nMap.Entry<Integer, String> first = scores.pollFirstEntry(); // Removes Alice\nMap.Entry<Integer, String> last = scores.pollLastEntry();   // Removes Charlie\n\n// Descending order\nNavigableSet<Integer> desc = scores.descendingSet();\n// Iterates: 50, 40, 30, 20, 10"
+            },
+            "codeExplanations": {
+              "english": "Examples demonstrate karte hain TreeSet ki core capabilities. First block dikhata hai automatic sorting natural ordering use karke (Integer implement karta hai Comparable). Second block create karta hai compound Comparator jo pehle string lengths compare karta hai, then alphabetical order use karta hai ties ke liye. Navigation methods (lower, floor, ceiling, higher) efficiently locate karte hain elements relative ek search key ko O(log n) time mein, jo HashMap ke saath impossible hai. Range operations (subSet, tailSet, headSet) provide karte hain views into portions of set bina data copy kiye, boolean parameters control karte hain inclusivity of endpoints. Finally, descendingSet() return karta hai reverse-order view of entire map bina data copy kiye, enable karta hai descending iteration ya largest elements pehle access karna efficiently."
+            },
+            "keyPoints": [
+              "TreeSet use karta hai Red-Black tree elements ko sorted order mein maintain karne ke liye, provide karta hai O(log n) operations compared to HashSet ke O(1), but enable karta hai sorted iteration aur range queries",
+              "Elements mutually comparable hone chahiye (Comparable implement karna chahiye) ya construction time pe Comparator provide karna chahiye; incompatible types mix karne se ClassCastException aati hai",
+              "NavigableSet interface offer karta hai unique navigation methods (lower, floor, ceiling, higher) nearest elements find karne ke liye, aur subSet for range views jo hash-based collections mein impossible hain",
+              "TreeSet allow nahi karta null elements kyunki null ke saath comparison throw karta hai NullPointerException, HashSet aur LinkedHashSet ke unlike jo allow karte hain one null"
+            ],
+            "extras": {
+              "flowDiagram": "Red-Black Tree Structure (simplified):\n      30 (Black)\n     /    \\\n  20 (Red)  40 (Red)\n  /          \\\n10 (Black)   50 (Black)\n\nBalance rules ensure path from root to leaf differs by at most 2x,\nguaranteeing O(log n) operations.",
+              "comparisonTable": "| Feature | HashSet | LinkedHashSet | TreeSet |\n|---------|---------|---------------|---------|\n| Ordering | None | Insertion/Access | Sorted (natural/Comparator) |\n| Time Complexity | O(1) | O(1) | O(log n) |\n| Null elements | 1 allowed | 1 allowed | Not allowed |\n| Comparable required | No | No | Yes |\n| Range queries | No | No | Yes (subSet, etc.) |",
+              "examples": [
+                "Calendar event storage sorted by timestamp with floor() to find current event",
+                "Dictionary word storage with subSet() for autocomplete prefix matching",
+                "Scoreboard maintaining top 10 with descendingSet() and size limiting"
+              ]
+            }
+          },
+          {
+            "id": "topic-3-4",
+            "title": "PriorityQueue",
+            "explanations": {
+              "english": "PriorityQueue implement karta hai Queue interface using binary min-heap data structure (complete binary tree satisfying heap property jahan parent <= children). Standard FIFO queues ke unlike, PriorityQueue order karta hai elements ko priority ke according, determined by natural ordering ya provided Comparator. Queue ka head hamesha least element hota hai (smallest natural ordering ke liye). Internal implementation use karta hai dynamic array (Object[]) structured as complete binary tree jahan left child hota hai at 2*i+1 aur right child at 2*i+2. Ye array representation provide karta hai compact memory usage aur cache efficiency. Offer (insertion) aur poll (removal) operations require karte hain O(log n) time heap property maintain karne ke liye through sift-up aur sift-down operations. Peek O(1) hota hai. PriorityQueue unbounded hai aur dynamically grow karta hai, null elements allow nahi karta, aur thread-safe nahi hai. Ye standard Java implementation hai scheduling algorithms, task prioritization, aur top-k elements find karne ke liye."
+            },
+            "code": {
+              "title": "Binary Heap Operations and Patterns",
+              "language": "java",
+              "content": "// Min-heap (smallest element at head)\nPriorityQueue<Integer> minHeap = new PriorityQueue<>();\nminHeap.offer(30);\nminHeap.offer(10);\nminHeap.offer(20);\nSystem.out.println(minHeap.poll()); // 10 (smallest)\nSystem.out.println(minHeap.poll()); // 20\n\n// Max-heap using reverse comparator\nPriorityQueue<Integer> maxHeap = new PriorityQueue<>(Collections.reverseOrder());\nmaxHeap.offer(10); maxHeap.offer(30); maxHeap.offer(20);\nSystem.out.println(maxHeap.poll()); // 30 (largest)\n\n// Custom object with Comparator\nPriorityQueue<Task> taskQueue = new PriorityQueue<>(\n    Comparator.comparingInt(Task::getPriority)\n              .thenComparing(Task::getCreatedTime)\n);\ntaskQueue.offer(new Task(3, \"Low\"));\ntaskQueue.offer(new Task(1, \"Critical\"));\ntaskQueue.offer(new Task(2, \"Medium\"));\n\n// Top K pattern: Find 3 largest numbers from stream\npublic List<Integer> findTopK(int[] nums, int k) {\n    PriorityQueue<Integer> minHeap = new PriorityQueue<>(k);\n    for (int num : nums) {\n        minHeap.offer(num);\n        if (minHeap.size() > k) {\n            minHeap.poll(); // Remove smallest, keep k largest\n        }\n    }\n    return new ArrayList<>(minHeap);\n}\n\n// Internal array representation:\n// Index 0: root, Index 1: left child of 0, Index 2: right child of 0\n// Parent(i) = (i-1)/2, Left(i) = 2*i+1, Right(i) = 2*i+2"
+            },
+            "codeExplanations": {
+              "english": "Examples demonstrate karte hain PriorityQueue usage patterns. minHeap naturally order karta hai integers ascending, hamesha smallest return karta hai via poll(). maxHeap example dikhata hai Collections.reverseOrder() use karke max-heap create karna largest-first retrieval ke liye. Task queue dikhata hai compound comparison: pehle by priority integer, then by timestamp FIFO tie-breaking ke liye. findTopK method demonstrate karta hai ek crucial algorithmic pattern: bounded min-heap of size k maintain karke allow karta hai infinite streams process karne ko k largest elements find karne ke liye O(n log k) time mein with O(k) space. Array-based binary heap indexing formula explain karta hai comments mein jahan tree relationships arithmetically calculate hote hain rather than via pointers, enable karta hai efficient storage aur heap maintenance."
+            },
+            "keyPoints": [
+              "PriorityQueue implement karta hai binary min-heap jahan smallest element (Comparator ya natural ordering ke according) hamesha head pe hota hai",
+              "Internal representation use karta hai array-based complete binary tree O(log n) offer aur poll operations ke saath heap property maintain karne ke liye through sift-up aur sift-down",
+              "Max-heap create karna require karta hai Collections.reverseOrder() ya custom comparator jo natural ordering ko reverse kare",
+              "PriorityQueue ideal hai scheduling, Dijkstra's algorithm, Huffman coding, aur top-k selection problems ke liye due to efficient priority ordering"
+            ],
+            "extras": {
+              "flowDiagram": "Binary Heap Structure (Array indices):\n       10 (0)\n      /      \\\n  20 (1)    30 (2)\n  /   \\      /\n40(3) 50(4) 60(5)\n\nOperations:\noffer(15):\n  1. Add at next available index (6)\n  2. Sift-up: Compare with parent(2), swap if smaller\n  3. Continue until heap property restored\n\npoll():\n  1. Remove root (10)\n  2. Move last element (60) to root\n  3. Sift-down: Swap with smaller child until heap property restored",
+              "comparisonTable": "",
+              "examples": [
+                "Operating system process scheduler prioritizing critical system tasks",
+                "Dijkstra's shortest path algorithm extracting minimum distance node",
+                "Merge k sorted arrays using heap to track smallest current element from each array"
+              ]
+            }
+          },
+          {
+            "id": "topic-3-5",
+            "title": "ArrayDeque",
+            "explanations": {
+              "english": "ArrayDeque (Array Double Ended Queue) ek resizable-array implementation hai Deque interface ki jo faster, more memory-efficient stack aur queue operations provide karti hai LinkedList aur legacy Stack class se. LinkedList ke unlike jo node objects with pointers use karta hai, ArrayDeque store karta hai elements circular array mein (head aur tail pointers wrap around), provide karta hai better cache locality aur lower memory overhead. Ise koi capacity restrictions nahi hain, automatically grow karti hai as needed, aur null elements allow nahi karti (used as sentinel values empty slots distinguish karne ke liye). ArrayDeque provide karta hai O(1) operations for addFirst, addLast, removeFirst, aur removeLast, making it suitable for both FIFO queues aur LIFO stacks. As a complete Stack aur Queue replacement, ye outperform karti hai Stack (jo Vector extend karta hai) aur LinkedList most scenarios mein. Circular array implementation avoid karta hai shifting overhead jo ArrayList incur karta agar front pe insert kare."
+            },
+            "code": {
+              "title": "ArrayDeque as Stack and Queue Replacement",
+              "language": "java",
+              "content": "// ArrayDeque as Stack (LIFO) - faster than Stack class\nDeque<String> stack = new ArrayDeque<>();\nstack.push(\"First\");    // addFirst\nstack.push(\"Second\");\nString top = stack.peek();   // peekFirst -> \"Second\"\nString popped = stack.pop(); // removeFirst -> \"Second\"\n\n// ArrayDeque as Queue (FIFO) - faster than LinkedList\nDeque<String> queue = new ArrayDeque<>();\nqueue.offer(\"Alice\");   // offerLast (equivalent to add)\nqueue.offer(\"Bob\");\nString head = queue.peek();  // peekFirst -> \"Alice\"\nString served = queue.poll(); // pollFirst -> \"Alice\"\n\n// Double-ended operations (Deque features)\nDeque<Integer> deque = new ArrayDeque<>();\ndeque.addFirst(1); // Front: [1]\ndeque.addLast(2);  // Back:  [1, 2]\ndeque.addFirst(0); // Front: [0, 1, 2]\nint first = deque.removeFirst(); // 0\nint last = deque.removeLast();   // 2\n\n// Circular array internals (conceptual):\n// head and tail pointers move circularly through array\n// addFirst: head = (head - 1) & (array.length - 1)\n// addLast:  tail = (tail + 1) & (array.length - 1)\n\n// Null prohibition\n// deque.offer(null); // NullPointerException - null used as sentinel in internal array"
+            },
+            "codeExplanations": {
+              "english": "Code demonstrate karta hai ArrayDeque ki dual role as both Stack aur Queue replacement. Stack example use karta hai push(), pop(), aur peek() methods jo deque ke head pe operate karte hain (addFirst/removeFirst), provide karte hain LIFO behavior Vector-based Stack se efficiently. Queue example use karta hai offer(), poll(), aur peek() head se remove aur tail se insert karne ke liye (ya vice versa method variant ke according), offer karta hai FIFO behavior bina LinkedList ki node allocation overhead ke. addFirst/addLast example dikhata hai Deque ki unique capability efficiently add aur remove karne ki dono ends se, ArrayList ke liye impossible bina O(n) shifting ke. Commented circular array arithmetic explain karta hai kaise bitwise operations maintain karte hain circular buffer pointer arithmetic jab array wrap around karta hai, enable karte hain O(1) operations dono ends pe."
+            },
+            "keyPoints": [
+              "ArrayDeque use karta hai circular array structure provide karte hue O(1) operations dono ends pe, making it faster than LinkedList for queue operations aur Stack for LIFO operations",
+              "No null elements allowed kyunki null use hota hai sentinel value indicate karne ke liye empty array slots in circular buffer implementation",
+              "Memory efficiency superior hai LinkedList se due to contiguous array storage (better cache locality) aur no per-element node object overhead",
+              "ArrayDeque preferred implementation hai both Stack (use push/pop) aur Queue (use offer/poll) use cases ke liye modern Java mein, completely replace karti hai legacy Stack aur LinkedList"
+            ],
+            "extras": {
+              "flowDiagram": "Circular Array Structure:\n[_, A, B, C, D, _]\n    ^        ^\n   head     tail\n\naddFirst(E):\n  head = (head - 1) & mask\n  array[head] = E\n\naddLast(E):\n  array[tail] = E\n  tail = (tail + 1) & mask\n\nWhen head == tail and full, double capacity and realign elements",
+              "comparisonTable": "| Operation | Stack (Vector) | LinkedList | ArrayDeque |\n|-----------|----------------|------------|------------|\n| push | O(1), synchronized | O(1) | O(1), faster |\n| pop | O(1), synchronized | O(1) | O(1), faster |\n| offer/poll | N/A (not Queue) | O(1) | O(1), less memory |\n| Memory overhead | High (synchronized) | High (node objects) | Low (array only) |\n| Thread-safe | Yes (slow) | No | No |",
+              "examples": [
+                "Undo/Redo functionality using two ArrayDeques (undoStack and redoStack)",
+                "Sliding window maximum in arrays using Deque to store indices",
+                "Breadth-first search (BFS) queue implementation"
+              ]
+            }
+          },
+          {
+            "id": "topic-3-6",
+            "title": "Set vs Queue Comparison",
+            "explanations": {
+              "english": "Sets aur Queues fundamentally different abstract data types represent karte hain distinct contracts aur use cases ke saath. Sets model karte hain mathematical sets: unordered collections of unique elements optimized for membership testing (contains), union, intersection, aur difference operations. Ye duplicates reject karte hain aur koi positional access provide nahi karte. Queues model karte hain real-world waiting lines: ordered collections (typically FIFO) designed holding elements prior to processing, restricted access ke saath (usually sirf head/tail operations). Sets ideal hain deduplication, uniqueness enforcement, aur membership queries ke liye (e.g., tracking visited nodes in graph traversal). Queues essential hain scheduling, buffering, load balancing, aur breadth-first search algorithms ke liye. Jabki dono indexed random access prohibit karte hain, Sets prioritize karte hain uniqueness aur fast lookup, jabki Queues prioritize karte hain insertion order preservation aur fair processing sequences. Concurrent versions exist karte hain dono ke liye (ConcurrentHashMap.newKeySet() for Sets, ConcurrentLinkedQueue/BlockingQueues for Queues)."
+            },
+            "code": {
+              "title": "Choosing Between Set and Queue",
+              "language": "java",
+              "content": "// Use Case 1: Deduplication (Set required)\nList<String> rawData = fetchDataWithDuplicates();\nSet<String> unique = new HashSet<>(rawData); // Automatically removes duplicates\n\n// Use Case 2: Task Scheduling (Queue required)\nQueue<Task> taskQueue = new ArrayDeque<>();\ntaskQueue.offer(new Task(\"Email\"));\ntaskQueue.offer(new Task(\"Report\"));\nTask next = taskQueue.poll(); // FIFO processing order guaranteed\n\n// Anti-pattern: Using Set for Queue behavior\nSet<Task> badIdea = new LinkedHashSet<>();\nbadIdea.add(task); // Can't enforce processing order easily\n\n// Anti-pattern: Using Queue for Set behavior  \nQueue<String> worseIdea = new LinkedList<>();\nworseIdea.offer(\"ID-123\");\nworseIdea.offer(\"ID-123\"); // Duplicate not prevented!\n\n// When order matters but uniqueness also matters: LinkedHashSet\nLinkedHashSet<String> orderedUnique = new LinkedHashSet<>();\n\n// When priority matters: PriorityQueue (specialized Queue)\nPriorityQueue<Alert> alerts = new PriorityQueue<>(\n    Comparator.comparing(Alert::getSeverity).reversed()\n);\n\n// Concurrent considerations\nSet<String> concurrentSet = ConcurrentHashMap.newKeySet(); // Thread-safe Set\nQueue<String> concurrentQueue = new ConcurrentLinkedQueue<>(); // Thread-safe Queue"
+            },
+            "codeExplanations": {
+              "english": "Examples clarify karte hain appropriate use cases. First block dikhata hai Set ki primary role deduplication mein by passing List with duplicates ko HashSet constructor ko, jo automatically remove kar deta hai unhe. Second block dikhata hai Queue ki essential FIFO behavior task processing ke liye. Anti-patterns demonstrate karte hain kyun swapping these structures fail hota hai: Sets provide nahi karte polling operations sequential processing ke liye, jabki Queues prevent nahi karte duplicates (crucial hai ID tracking ke liye). LinkedHashSet example offer karta hai hybrid for ordered uniqueness. PriorityQueue example dikhata hai Queue ki ability priority ordering handle karne ki simple FIFO se beyond. Finally, concurrent versions dikhate hain thread-safe alternatives dono categories ke liye, with ConcurrentHashMap.newKeySet() provide karta hai concurrent Set backed by ConcurrentHashMap, aur ConcurrentLinkedQueue provide karta hai lock-free queue operations."
+            },
+            "keyPoints": [
+              "Sets enforce karte hain uniqueness of elements aur optimize karte hain membership testing (contains) ke liye, jabki Queues preserve karte hain insertion order aur optimize karte hain sequential access (poll/peek) ke liye",
+              "Sets appropriate hain deduplication, mathematical operations (union/intersection), aur tracking visited items ke liye; Queues appropriate hain scheduling, buffering, aur BFS algorithms ke liye",
+              "Sets generally offer nahi karte ordering guarantees (except LinkedHashSet/TreeSet), jabki Queues guarantee karte hain specific retrieval orders (FIFO for standard queues, priority order for PriorityQueue)",
+              "Dono interfaces ke concurrent implementations hain, lekin different threading models: CopyOnWriteArraySet for Sets (snapshot iteration) versus BlockingQueue implementations for Queues (producer-consumer patterns)"
+            ],
+            "extras": {
+              "flowDiagram": "",
+              "comparisonTable": "| Characteristic | Set | Queue |\n|----------------|-----|-------|\n| Duplicates | Prohibited | Allowed |\n| Primary Operation | contains(e) | offer(e), poll() |\n| Ordering | Unordered (usually) | Ordered (FIFO/Priority) |\n| Access Pattern | Random access check | Sequential processing |\n| Head retrieval | No standard method | peek()/poll() |\n| Use case | Uniqueness, membership | Scheduling, buffering |",
+              "examples": [
+                "Set: User ID validation ensuring no duplicate registrations",
+                "Queue: Print job spooling where documents process in submission order",
+                "Hybrid: LRU cache using LinkedHashSet for ordered unique access history"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "section-4",
+        "title": "Map Implementations",
+        "topics": [
+          {
+            "id": "topic-4-1",
+            "title": "HashMap",
+            "explanations": {
+              "english": "HashMap sabse widely used Map implementation hai, jo provide karta hai O(1) average time complexity get aur put operations ke liye through hash-based bucket storage. Internally, ye use karta hai ek array of Node objects (buckets) jahan har node contain karta hai hash, key, value, aur next reference collision handling ke liye. Hash function apply karta hai supplemental hashing poor hashCode() implementations se bachne ke liye, phir determine karta hai bucket index via (n - 1) & hash bit masking. Jab entries ki number loadFactor (default 0.75) times capacity exceed karti hai, table double ho jata hai size mein aur saare entries rehash hote hain. Java 8 mein treeification introduce hui: buckets mein 8 se zyada entries hone pe linked lists se red-black trees mein convert ho jate hain, improving worst-case performance O(n) se O(log n) hash collision attacks ke dauran. HashMap allow karta hai ek null key (bucket 0 mein store hoti hai) aur unlimited null values, although null keys ke liye special handling chahiye hoti hai kyunki hashCode() null pe call nahi ho sakta."
+            },
+            "code": {
+              "title": "HashMap Internals and Optimization",
+              "language": "java",
+              "content": "// Internal structure: Node<K,V>[] table where index = (table.length - 1) & hash\nHashMap<String, Integer> map = new HashMap<>();\n\n// Default: initial capacity 16, load factor 0.75, resize at 12 entries\n// Optimized construction when size is known\nHashMap<String, Integer> optimized = new HashMap<>(1000);\n// Calculates capacity as 2^ceil(log2(1000/0.75)) to avoid immediate resizing\n\n// Hash calculation (defends against poor hashCode() distributions)\n// static final int hash(Object key) {\n//     int h;\n//     return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);\n// }\n\n// Operations\nmap.put(\"key\", 100);      // Compute hash, find bucket, insert/update\nInteger val = map.get(\"key\"); // O(1) hash lookup\nmap.remove(\"key\");        // Remove from bucket chain/tree\n\n// Collision handling evolution:\n// Java 7: Linked list only (O(n) worst case)\n// Java 8+: Linked list -> TreeMap when chain size > 8 (O(log n))\n\n// Null key handling\nmap.put(null, 0);         // Stored in bucket 0, hash treated as 0\nInteger nullVal = map.get(null); // Special handling for null keys\n\n// Resize mechanism triggered at threshold = capacity * loadFactor\n// Creates new table[capacity * 2], rehashes all entries\n// Treeified buckets may untreeify if they shrink below 6 entries"
+            },
+            "codeExplanations": {
+              "english": "Ye code HashMap ke sophisticated internals illustrate karta hai. Hash method dikhata hai supplemental hashing: high 16 bits ko low bits ke saath XOR karke ensure karta hai ki hashCode() values jo sirf upper bits mein variation rakhte hain (common hai auto-generated IDs mein) still evenly distribute hain across table ke lower index bits. Optimized constructor comment explain karta hai kaise HashMap calculate karta hai nearest power-of-2 capacity expected entries accommodate karne ke liye bina resizing ke. Collision handling note explain karta hai Java 8 ki adaptive strategy: standard linked lists degrade kar sakti hain O(n) mein worst case mein, toh jab chains lambi ho jati hain (indicating poor hash distribution ya malicious attack), ye convert ho jati hain balanced trees mein O(log n) guarantee ke liye. Null key handling dikhata hai special casing kyunki null.hashCode() throw karega NullPointerException; instead, null hash hota hai 0 pe aur land karta hai bucket 0 mein."
+            },
+            "keyPoints": [
+              "HashMap use karta hai buckets ka array jahan bucket index determine hota hai hash & (capacity-1) se; capacity hamesha power of 2 hoti hai taaki bitwise index calculation enable ho sake",
+              "Load factor (default 0.75) determine karta hai threshold resizing ke liye; jab size capacity * loadFactor exceed karti hai, table double ho jata hai aur saare entries rehash hote hain new buckets mein",
+              "Java 8 mein HashMap introduce kiya treeification: 8+ entries waale buckets convert hote hain linked lists se red-black trees mein, prevent karte hain O(n) degradation worst-case hash collision scenarios mein",
+              "Ek null key allowed hai (bucket 0 mein store hoti hai) aur unlimited null values allowed hain; null keys ke liye special handling chahiye hoti hai kyunki unka hashCode() compute nahi ho sakta"
+            ],
+            "extras": {
+              "flowDiagram": "Put Operation:\n1. Compute hash(key) using supplemental hashing\n2. Calculate index: (table.length - 1) & hash\n3. Check bucket at index:\n   - Empty: Create new Node, store\n   - Occupied: Check equality of keys\n     - Equal key: Replace value\n     - Different key: Collision handling\n       - If < 8 nodes: Append to linked list\n       - If >= 8 nodes: Convert to TreeNode\n4. Check if size > threshold (capacity * loadFactor)\n   - Yes: Resize table (capacity * 2), rehash all entries",
+              "comparisonTable": "",
+              "examples": []
+            }
+          },
+          {
+            "id": "topic-4-2",
+            "title": "LinkedHashMap",
+            "explanations": {
+              "english": "LinkedHashMap extend karta hai HashMap ko taaki ek doubly-linked list maintain ho sake saare entries ke through, predictable iteration order provide karte hue HashMap ke O(1) performance characteristics ke saath. By default, ye maintain karta hai insertion order (entries appear jis order mein pehli baar insert hue the), making it ideal for configurations ya ordered caching. Alternatively, ye access order mode mein operate kar sakta hai (third constructor parameter true), jahan kisi entry ko access karne se wo linked list ke end mein move ho jata hai; ye enable karta hai classic LRU (Least Recently Used) cache implementation ko by overriding removeEldestEntry(). LinkedHashMap maintain karta hai linked list by overriding HashMap ke node creation methods taaki LinkedHashMap.Entry instances create ho sakein before/after pointers ke saath. Ye slightly higher memory overhead incur karta hai HashMap se in additional pointers ki wajah se, lekin identical time complexity maintain karta hai saare operations ke liye. Linked list ordering affect nahi hoti rehashing operations ke dauran."
+            },
+            "code": {
+              "title": "LinkedHashMap Ordering and LRU Cache",
+              "language": "java",
+              "content": "// Insertion order (default) - elements iterate in order added\nLinkedHashMap<String, Integer> insertionOrder = new LinkedHashMap<>();\ninsertionOrder.put(\"First\", 1);\ninsertionOrder.put(\"Second\", 2);\ninsertionOrder.put(\"Third\", 3);\n// Iteration order: First, Second, Third\n\n// Access order mode - accessed elements move to end\nLinkedHashMap<String, Integer> accessOrder = new LinkedHashMap<>(16, 0.75f, true);\naccessOrder.put(\"A\", 1);\naccessOrder.put(\"B\", 2);\naccessOrder.put(\"C\", 3);\naccessOrder.get(\"A\"); // Accessing A moves it to tail\naccessOrder.add(\"D\", 4);      // New additions go to end\n// Iteration order: B, C, A, D (least recently accessed first)\n\n// LRU Cache implementation\nclass LRUCache<K, V> extends LinkedHashMap<K, V> {\n    private final int capacity;\n    \n    public LRUCache(int capacity) {\n        super(capacity, 0.75f, true); // true = access order\n        this.capacity = capacity;\n    }\n    \n    @Override\n    protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {\n        // Return true to remove eldest when size exceeds capacity\n        return size() > capacity;\n    }\n}\n\n// Usage\nLRUCache<String, String> cache = new LRUCache<>(3);\ncache.put(\"Key1\", \"Val1\");\ncache.put(\"Key2\", \"Val2\");\ncache.put(\"Key3\", \"Val3\");\ncache.get(\"Key1\"); // Mark Key1 as recently used\ncache.put(\"Key4\", \"Val4\"); // Evicts Key2 (least recently used)\n\n// Note: LinkedHashMap iteration order remains stable during rehashing\n// Linked list pointers are maintained independent of hash table buckets"
+            },
+            "codeExplanations": {
+              "english": "Ye code LinkedHashMap ki dual mode capability demonstrate karta hai. insertionOrder example dikhata hai default behavior jahan iteration put() sequence follow karta hai regardless of subsequent access. accessOrder example activate karta hai LRU tracking by passing true as third constructor argument; every get() ya put() of existing key move karta hai us entry ko tail pe, making head hamesha least recently accessed. LRUCache class leverage karta hai ye by overriding removeEldestEntry(), ek hook jo LinkedHashMap call karta hai har insertion ke baad; true return karta hai toh automatic removal trigger hota hai eldest entry ka (head of linked list ka). Ye create karta hai zero-configuration LRU cache O(1) operations ke saath. Final comment note karta hai important stability property: HashMap ke unlike jiski iteration order completely change hoti hai resize pe, LinkedHashMap ki linked list consistent order maintain karti hai even jab underlying hash table restructure hota hai."
+            },
+            "keyPoints": [
+              "LinkedHashMap maintain karta hai doubly-linked list saare entries ke through provide karte hue O(1) operations while guaranteeing either insertion order (default) ya access order (LRU mode)",
+              "Access-order mode (third constructor parameter true) move karta hai accessed entries ko tail pe, making head hamesha least-recently-used element, ideal for cache eviction",
+              "LRU caches implement hote hain by extending LinkedHashMap aur overriding removeEldestEntry() taaki true return ho jab size capacity exceed kare, automatically evicting oldest entry",
+              "Iteration order stable rehti hai rehashing operations ke dauran kyunki linked list structure independent hai hash table bucket distribution se"
+            ],
+            "extras": {
+              "flowDiagram": "LinkedHashMap Structure:\n[Hash Table Buckets - same as HashMap]\n   |\n   +-- Linked list running through ALL entries:\n       [Head] <-> Node A <-> Node B <-> Node C <-> [Tail]\n\nAccess Order Mode:\nget(B) triggers:\n  1. Remove B from current position\n  2. Re-link: A <-> C\n  3. Move B to tail: C <-> B <-> [new position]\n\nLRU Eviction:\nput(D) when size > capacity:\n  1. Insert D at tail\n  2. removeEldestEntry() returns true\n  3. Remove Head (Node A - least recently used)",
+              "comparisonTable": "| Feature | HashMap | LinkedHashMap |\n|---------|---------|---------------|\n| Iteration Order | Unpredictable | Insertion or Access order |\n| Performance | O(1) | O(1) (slightly higher constant) |\n| Memory | Lower | Higher (pointers per entry) |\n| LRU Cache | Manual implementation | removeEldestEntry() hook |\n| Null Handling | 1 null key, many null values | Same |",
+              "examples": []
+            }
+          },
+          {
+            "id": "topic-4-3",
+            "title": "TreeMap",
+            "explanations": {
+              "english": "TreeMap implement karta hai NavigableMap interface using Red-Black tree (self-balancing binary search tree) taaki keys sorted order mein maintain ho sakein. Hash-based maps ke unlike, TreeMap guarantee karta hai O(log n) time containsKey, get, put, aur remove operations ke liye while providing ordered views of data. Keys must implement Comparable ya construction pe Comparator provide karna chahiye; otherwise ClassCastException throw hoti hai insertion pe. TreeMap prohibit karta hai null keys (kyunki compareTo(null) throw karta hai NullPointerException) lekin allow karta hai null values. NavigableMap ke roop mein, ye offer karta hai unique capabilities: subMap, headMap, aur tailMap range views ke liye (views backed by original map, changes reflect hote hain), aur navigation methods jaise ceilingKey, floorKey, higherKey, aur lowerKey given key ke nearest matches find karne ke liye. Sorted nature make karti hai TreeMap ko ideal for range queries, scheduling systems, aur implementing priority-like access jahan key ordering matter karti hai."
+            },
+            "code": {
+              "title": "TreeMap Navigation and Range Views",
+              "language": "java",
+              "content": "// Natural ordering (String implements Comparable)\nTreeMap<String, Integer> map = new TreeMap<>();\nmap.put(\"Charlie\", 3);\nmap.put(\"Alice\", 1);\nmap.put(\"Bob\", 2);\n// Iteration order: Alice, Bob, Charlie (alphabetical)\n\n// Custom Comparator (reverse order)\nTreeMap<Integer, String> descending = new TreeMap<>(Collections.reverseOrder());\ndescending.put(10, \"A\");\ndescending.put(20, \"B\");\n// First key: 20 (largest)\n\n// NavigableMap operations - finding nearest keys\nTreeMap<Integer, String> scores = new TreeMap<>();\nscores.put(50, \"Pass\");\nscores.put(70, \"Good\");\nscores.put(90, \"Excellent\");\n\nInteger lower = scores.lowerKey(75);      // 70 (strictly less)\nInteger floor = scores.floorKey(70);      // 70 (less than or equal)\nInteger ceiling = scores.ceilingKey(75);  // 90 (greater than or equal)\nInteger higher = scores.higherKey(70);    // 90 (strictly greater)\n\n// Range views (backed by original map)\nSortedMap<Integer, String> passed = scores.subMap(60, 100); // 70->Good, 90->Excellent\nNavigableMap<Integer, String> tail = scores.tailMap(70, true); // Include 70\nSortedMap<Integer, String> head = scores.headMap(70); // Exclude 70\n\n// Polling operations (retrieve and remove)\nMap.Entry<Integer, String> first = scores.pollFirstEntry(); // Removes Alice\nMap.Entry<Integer, String> last = scores.pollLastEntry();   // Removes Charlie\n\n// Descending map view\nNavigableMap<Integer, String> desc = scores.descendingMap();\n// Iterates in reverse: Excellent(90), Good(70), Pass(50)"
+            },
+            "codeExplanations": {
+              "english": "Ye examples demonstrate karte hain TreeMap ki sorted capabilities. First block dikhata hai automatic sorting natural ordering use karke (String implement karta hai Comparable). Second block create karta hai descending order map jahan largest keys pehle appear hote hain. Navigation methods (lowerKey, floorKey, ceilingKey, higherKey) efficiently locate karte hain keys relative ek search value ko O(log n) time mein, jo HashMap ke saath impossible hai. Range operations (subMap, tailMap, headMap) return karte hain views into original map rather than copies, toh view mein modifications original mein reflect hote hain and vice versa; ye enable karta hai memory-efficient handling of key ranges. Poll methods combine karte hain retrieval with removal, useful hain entries ko order mein process karne ke liye. Finally, descendingMap() provide karta hai reverse-order view of entire map bina data copy kiye, enable karta hai iteration from largest to smallest key efficiently."
+            },
+            "keyPoints": [
+              "TreeMap maintain karta hai keys sorted order mein using Red-Black tree, provide karta hai O(log n) operations compared to HashMap ke O(1), but enable karta hai sorted iteration aur range operations",
+              "Keys mutually comparable hone chahiye (Comparable implement karna chahiye) ya Comparator provide karna chahiye construction time pe; TreeMap allow nahi karta null keys due to comparison requirements",
+              "NavigableMap interface provide karta hai unique navigation methods (ceilingKey, floorKey, etc.) nearest keys find karne ke liye, aur subMap for range views jo hash-based collections mein impossible hain",
+              "TreeMap ideal hai range queries, finding nearest values, aur maintaining sorted data jahan key ordering significant hai, jaise time-series data ya interval scheduling"
+            ],
+            "extras": {
+              "flowDiagram": "",
+              "comparisonTable": "| Operation | HashMap | LinkedHashMap | TreeMap |\n|-----------|---------|---------------|---------|\n| Ordering | None | Insertion/Access | Sorted (natural/Comparator) |\n| Get/Put | O(1) | O(1) | O(log n) |\n| Sorted iteration | No | No | Yes |\n| Range queries | No | No | Yes (subMap, etc.) |\n| Null keys | 1 allowed | 1 allowed | Not allowed |\n| Null values | Yes | Yes | Yes |",
+              "examples": [
+                "Calendar scheduling: TreeMap<Long, Event> with timestamp keys for range queries",
+                "Interval management: Finding overlapping time ranges using ceiling/floor methods",
+                "Leaderboard implementation: Descending map view to show highest scores first"
+              ]
+            }
+          },
+          {
+            "id": "topic-4-4",
+            "title": "Hashtable (Legacy)",
+            "explanations": {
+              "english": "Hashtable original Map implementation hai Java 1.0 se jo Collections Framework se pehle ka hai. Ye synchronized hai every method pe intrinsic lock (synchronized keyword) use karke, making it thread-safe lekin poor concurrency performance ke saath. HashMap ke unlike, Hashtable allow nahi karta null keys ya null values, throw karta hai NullPointerException immediately kisi bhi attempt pe null store karne ka. Iska enumeration interface largely replace ho chuka hai Iterator se, although ye abhi bhi support karta hai elements() aur keys() methods. Hashtable use karta hai different collision resolution strategy modern HashMap se aur support nahi karta Java 8+ ke treeification optimizations high-collision scenarios ke liye. Class consider ki jaati hai obsolete new code ke liye kyunki Collections.synchronizedMap() provide karta hai similar thread-safety kisi bhi Map pe, jabki ConcurrentHashMap offer karta hai superior concurrent performance. Hashtable exist karta hai primarily backward compatibility ke liye legacy APIs ke saath aur use nahi karna chahiye modern applications mein."
+            },
+            "code": {
+              "title": "Hashtable Limitations and Replacements",
+              "language": "java",
+              "content": "// LEGACY: Hashtable - synchronized on every method\nHashtable<String, String> legacy = new Hashtable<>();\nlegacy.put(\"key\", \"value\"); // Entire table locked during operation\n// legacy.put(null, \"value\"); // NullPointerException - no null keys allowed\n// legacy.put(\"key\", null);   // NullPointerException - no null values allowed\n\n// MODERN ALTERNATIVE 1: Collections.synchronizedMap\nMap<String, String> syncMap = Collections.synchronizedMap(new HashMap<>());\n// Same coarse-grained locking, but works with any Map implementation\n\n// MODERN ALTERNATIVE 2: ConcurrentHashMap (preferred)\nConcurrentHashMap<String, String> concurrent = new ConcurrentHashMap<>();\nconcurrent.put(\"key\", \"value\"); // Lock-free or fine-grained locking\nconcurrent.put(\"nullKey\", null); // NullPointerException in CHM too (mostly)\n\n// Legacy Enumeration interface\nEnumeration<String> keys = legacy.keys();\nwhile (keys.hasMoreElements()) {\n    String key = keys.nextElement();\n    // Legacy iteration, replaced by Iterator in modern code\n}\n\n// Performance comparison in multi-threaded scenarios:\n// 1 thread: Hashtable ~ HashMap\n// 2+ threads: Hashtable throughput collapses due to single lock\n// ConcurrentHashMap: Scales well with thread count"
+            },
+            "codeExplanations": {
+              "english": "Ye code demonstrate karta hai kyun Hashtable obsolete hai. Hashtable example dikhata hai iski strict null rejection policy, HashMap ki allowance ke contrast mein jo ek null key aur unlimited null values allow karta hai. synchronizedMap alternative dikhata hai kaise same coarse-grained synchronization kisi bhi Map pe apply ho sakti hai, making Hashtable redundant. ConcurrentHashMap example dikhata hai modern replacement jo provide karta hai thread-safety bina performance penalty ke of locking entire table. Enumeration example dikhata hai legacy iteration interface jo Iterator se pehle aaya tha aur remove() operation lack karta hai. Performance comment explain karta hai Hashtable ki fundamental flaw: jabki concurrent access ke liye safe hai, iski single-lock approach ka matlab hai saari threads serialize hoti hain object monitor ke through, causing throughput severe degrade under contention, jabki ConcurrentHashMap use karta hai fine-grained locking allow karte hue concurrent reads aur writes."
+            },
+            "keyPoints": [
+              "Hashtable synchronized hai every method pe intrinsic locks use karke, causing poor scalability under concurrent access compared to modern concurrent collections",
+              "HashMap ke unlike, Hashtable prohibit karta hai both null keys aur null values, throw karta hai NullPointerException immediately upon insertion attempts",
+              "Hashtable lack karta hai modern optimizations present in HashMap, jaise Java 8 ka treeification efficient handling ke liye high-collision scenarios mein",
+              "Hashtable consider kiya jaata hai obsolete; use karein ConcurrentHashMap concurrent scenarios ke liye, ya Collections.synchronizedMap() simple synchronization needs ke liye over standard HashMap"
+            ],
+            "extras": {
+              "flowDiagram": "",
+              "comparisonTable": "| Feature | Hashtable | HashMap | ConcurrentHashMap |\n|---------|-----------|---------|-------------------|\n| Thread-safe | Yes (synchronized) | No | Yes (fine-grained) |\n| Performance | Poor (single lock) | Excellent | Excellent |\n| Null keys | No | 1 allowed | No (mostly) |\n| Null values | No | Yes | No (mostly) |\n| Legacy | Yes (1.0) | No (1.2) | No (1.5) |\n| Iteration | Enumeration/Iterator | Iterator | Weakly consistent |",
+              "examples": []
+            }
+          },
+          {
+            "id": "topic-4-5",
+            "title": "ConcurrentHashMap",
+            "explanations": {
+              "english": "ConcurrentHashMap provide karta hai thread-safe concurrent access bina coarse-grained locking ke Hashtable ya synchronized wrappers ke. Java 7 use karta tha segment-based locking (default 16 segments) jahan har segment independent hash table tha apne lock ke saath, allow karte hue 16 concurrent writer threads. Java 8+ ne redesign kiya using CAS (Compare-And-Swap) operations aur fine-grained synchronized blocks individual bucket heads pe. Reads generally lock-free hoti hain (volatile reads), jabki writes use karte hain CAS initial insertion ke liye aur synchronized blocks specific bucket pe race conditions prevent karne ke liye. Map support karta hai high concurrency both reads aur writes ke liye, weakly consistent iterators jo throw nahi karte ConcurrentModificationException, aur parallel bulk operations jaise forEach, search, aur reduce. Ye allow nahi karta null keys ya values (avoid karne ke liye ambiguity between 'key not found' aur 'key mapped to null' in concurrent contexts). Implementation use karta hai sophisticated techniques jaise treeification large buckets ke liye, counter cells concurrent size calculation ke liye, aur transfer tables non-blocking resizing ke liye."
+            },
+            "code": {
+              "title": "ConcurrentHashMap Patterns and Atomic Operations",
+              "language": "java",
+              "content": "// Creation\nConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>();\n\n// Thread-safe operations\nmap.put(\"key\", 100);\nInteger val = map.get(\"key\"); // Lock-free read\n\n// Atomic compute operations (avoids race conditions)\nmap.compute(\"key\", (k, v) -> v == null ? 1 : v + 1); // Atomic increment\nmap.computeIfAbsent(\"key2\", k -> expensiveComputation()); // Atomic check-then-act\nmap.computeIfPresent(\"key\", (k, v) -> v > 0 ? v - 1 : null); // Atomic conditional update\n\n// Merging values atomically\nmap.merge(\"count\", 1, Integer::sum); // Increment or initialize to 1\n\n// Concurrent bulk operations (Java 8+)\nmap.forEach(3, (k, v) -> System.out.println(k + \"=\" + v)); // Parallelism threshold 3\nString result = map.search(3, (k, v) -> v > 100 ? k : null); // Find first key > 100\n\n// No nulls allowed (design decision)\n// map.put(null, \"value\"); // NullPointerException\n// map.put(\"key\", null);   // NullPointerException\n\n// Weakly consistent iteration\nIterator<String> iter = map.keySet().iterator();\nwhile (iter.hasNext()) {\n    String key = iter.next();\n    map.put(\"newKey\", 0); // No ConcurrentModificationException\n    // Iterator reflects some state at or since creation\n}"
+            },
+            "codeExplanations": {
+              "english": "Ye code demonstrate karta hai ConcurrentHashMap ke advanced concurrency features. Atomic compute methods (compute, computeIfAbsent, computeIfPresent) perform karte hain read-modify-write operations atomically bina external synchronization ke, eliminate karte hue check-then-act race conditions. Merge method provide karta hai concise way existing aur new values combine karne ke liye using BiFunction. Bulk operations (forEach, search) accept karte hain parallelism threshold; jab map size is exceed karta hai, operations execute hote hain parallel using common ForkJoinPool, leverage karte hue multi-core processors. Null rejection deliberate design choice hai: multi-threaded contexts mein, distinguish karna between 'key mapped to null' aur 'key absent' problematic hota hai kyunki doosra thread insert kar sakta hai mapping immediately null check karne ke baad. Finally, weakly consistent iterator example dikhata hai ki unlike fail-fast iterators on standard collections, ConcurrentHashMap ke iterators operate karte hain snapshot ya current state pe aur tolerate karte hain concurrent modifications bina exceptions ke, though ye reflect kar sakte hain concurrent changes during iteration."
+            },
+            "keyPoints": [
+              "ConcurrentHashMap use karta hai CAS operations aur fine-grained bucket locking (Java 8+) allow karte hue high-concurrency reads (usually lock-free) aur writes bina locking entire table",
+              "Provide karta hai atomic compound operations (compute, computeIfAbsent, merge) jo perform karte hain complex read-modify-write sequences atomically bina external synchronization",
+              "Allow nahi karta null keys ya values avoid karne ke liye ambiguity between 'not present' aur 'mapped to null' in concurrent multi-threaded access patterns",
+              "Offer karta hai weakly consistent iterators aur parallel bulk operations (forEach, search, reduce) jo scale karte hain across multiple threads large maps process karne ke liye efficiently"
+            ],
+            "extras": {
+              "flowDiagram": "Java 8+ Structure:\n[Node[] table] (main hash table)\n   |\n   +-- Node (linked list head)\n   |      |\n   |      +-- Node -> Node -> TreeNode (if >8 entries)\n   |\n   +-- Node\n          |\n          +-- Node\n\nResize mechanism:\n- Non-blocking: Threads help transfer buckets to new table\n- ForwardingNode marks migrated buckets\n- No 'stop-the-world' lock during resize",
+              "comparisonTable": "| Characteristic | Hashtable | Collections.synchronizedMap | ConcurrentHashMap |\n|----------------|-----------|---------------------------|-------------------|\n| Locking | Single lock | Single lock | Fine-grained/CAS |\n| Read concurrency | 1 thread | 1 thread | Many threads |\n| Write concurrency | 1 thread | 1 thread | Many (per bucket) |\n| Scalability | Poor | Poor | Excellent |\n| Null support | No | Depends on backing | No |\n| Iterator | Fail-fast | Fail-fast | Weakly consistent |",
+              "examples": []
+            }
+          },
+          {
+            "id": "topic-4-6",
+            "title": "Map Comparison & Best Practices",
+            "explanations": {
+              "english": "Appropriate Map implementation select karna require karta hai balancing thread safety requirements, ordering needs, performance characteristics, aur memory constraints. Use karein HashMap as default choice jab aapko fast O(1) lookups chahiye bina ordering guarantees ya concurrency ke. Choose karein LinkedHashMap jab insertion ya access order preserve karni hai, particularly LRU caches implement karne ke liye ya predictable iteration sequences maintain karne ke liye. Select karein TreeMap jab sorted keys chahiye, range queries chahiye, ya nearest-key searches jo hash-based maps provide nahi kar sakte. Avoid karein Hashtable entirely; single-threaded code ke liye HashMap use karein, concurrent code ke liye ConcurrentHashMap use karein. Thread-safe sorted maps ke liye, use karein Collections.synchronizedSortedMap wrapping TreeMap ya ConcurrentSkipListMap for concurrent sorted access. Memory considerations matter: HashMap ka moderate overhead hai, LinkedHashMap add karta hai pointers for ordering, TreeMap add karta hai tree node overhead, jabki ConcurrentHashMap ka highest overhead hai due to counter cells aur complex node structures. Jab thread safety occasionally chahiye hoti hai rather than continuously, consider karein wrapping HashMap with synchronized blocks manually rather than paying continuous overhead of concurrent collections."
+            },
+            "code": {
+              "title": "Map Selection Decision Matrix",
+              "language": "java",
+              "content": "// DECISION 1: Threading model\n// Single-threaded: HashMap (fastest)\nMap<String, String> single = new HashMap<>();\n\n// Occasional multi-thread: Synchronized wrapper\nMap<String, String> occasionallySync = Collections.synchronizedMap(new HashMap<>());\n\n// High concurrency: ConcurrentHashMap\nConcurrentHashMap<String, String> concurrent = new ConcurrentHashMap<>();\n\n// DECISION 2: Ordering requirements\n// No order: HashMap\n// Insertion order: LinkedHashMap\nMap<String, String> insertionOrder = new LinkedHashMap<>();\n\n// Sorted/Navigable: TreeMap\nNavigableMap<String, String> sorted = new TreeMap<>();\n\n// Concurrent + Sorted: ConcurrentSkipListMap\nConcurrentNavigableMap<String, String> concurrentSorted = new ConcurrentSkipListMap<>();\n\n// DECISION 3: Performance tuning\n// Known size (avoid resizing)\nint expectedSize = 1000;\nint initialCapacity = (int) (expectedSize / 0.75f) + 1;\nMap<String, String> sized = new HashMap<>(initialCapacity);\n\n// LRU Cache with specific access characteristics\nLinkedHashMap<String, byte[]> cache = new LinkedHashMap<String, byte[]>(128, 0.75f, true) {\n    @Override\n    protected boolean removeEldestEntry(Map.Entry<String, byte[]> eldest) {\n        return size() > 100 || eldest.getValue().length > 1024*1024; // Size or weight-based eviction\n    }\n};\n\n// Immutable maps (Java 9+)\nMap<String, Integer> immutable = Map.of(\"A\", 1, \"B\", 2); // Max 10 entries\nMap<String, Integer> largerImmutable = Map.copyOf(existingMap); // Unlimited"
+            },
+            "codeExplanations": {
+              "english": "Ye code provide karta hai practical decision matrix. Threading section dikhata hai progression from unsynchronized (HashMap) to coarse-grained synchronization (synchronizedMap) to high-performance concurrency (ConcurrentHashMap). Ordering section match karta hai requirements ko implementations se: no order (HashMap), predictable iteration (LinkedHashMap), sorted (TreeMap), aur concurrent sorted (ConcurrentSkipListMap). Performance tuning example dikhata hai initial capacity calculate karna to avoid expensive resizing: expected size ko load factor (0.75) se divide karke ensure karta hai map hold kar sake saari entries bina rehashing ke. LinkedHashMap example demonstrate karta hai advanced cache eviction logic jo consider karta hai both entry count aur memory weight (byte array size), override karte hue removeEldestEntry() taaki evict ho jab either threshold exceed hota hai. Immutable examples dikhate hain modern Java 9+ factory methods creating read-only maps efficiently."
+            },
+            "keyPoints": [
+              "Default to HashMap for general use; use karein LinkedHashMap for predictable iteration order ya LRU caching, TreeMap for sorted data aur range queries",
+              "Avoid karein Hashtable; use karein ConcurrentHashMap for concurrent access, ya Collections.synchronizedMap for occasional synchronization needs over standard HashMap",
+              "Calculate karein initial capacity as (expectedSize / loadFactor) + 1 taaki costly resizing prevent ho sake jab entries ki number advance mein pata ho",
+              "Consider karein memory overhead: TreeMap ka highest per-entry cost hai tree nodes ki wajah se, ConcurrentHashMap ka structure overhead hai concurrency ke liye, jabki HashMap sabse memory-efficient hai simple storage ke liye"
+            ],
+            "extras": {
+              "flowDiagram": "",
+              "comparisonTable": "| Use Case | Recommended | Avoid |\n|----------|-------------|-------|\n| General purpose | HashMap | Hashtable |\n| Predictable order | LinkedHashMap | HashMap + manual sorting |\n| Sorted keys | TreeMap | Sorting HashMap entries |\n| High concurrency | ConcurrentHashMap | Hashtable, synchronizedMap |\n| Concurrent + Sorted | ConcurrentSkipListMap | TreeMap + external sync |\n| LRU Cache | LinkedHashMap | Manual timestamp tracking |\n| Immutable data | Map.of(), Map.copyOf() | Collections.unmodifiableMap |",
+              "examples": [
+                "Configuration storage: LinkedHashMap preserves insertion order of properties",
+                "Rate limiting: ConcurrentHashMap atomic compute methods for sliding window counters",
+                "Database index simulation: TreeMap for range queries on primary keys"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "section-5",
+        "title": "Iterators, Generics, Sorting & Searching",
+        "topics": [
+          {
+            "id": "topic-5-1",
+            "title": "Iterator Variants",
+            "explanations": {
+              "english": "Java Collections Framework provide karta hai three primary iteration mechanisms. Iterator universal interface hai forward-only traversal ke liye with hasNext(), next(), aur optional remove() methods, available on all Collections. ListIterator extend karta hai Iterator specifically Lists ke liye, adding bidirectional traversal (hasPrevious(), previous()), index awareness (nextIndex(), previousIndex()), aur safe element replacement via set() aur add() during iteration. Enumeration legacy pre-Java 2 interface hai jo Vector aur Hashtable use karte hain, provide karta hai hasMoreElements() aur nextElement() but no removal capability; ye supersede ho chuka hai Iterator se lekin backward compatibility ke liye remain karta hai. ListIterator uniquely powerful hai List manipulation ke liye during iteration, allow karta hai traverse backward from known position aur modify elements bina iterator state invalidate kiye, unlike basic Iterator jo sirf forward movement aur removal support karta hai."
+            },
+            "code": {
+              "title": "Iterator Types and Capabilities",
+              "language": "java",
+              "content": "// Standard Iterator (Collection interface)\nList<String> list = Arrays.asList(\"A\", \"B\", \"C\");\nIterator<String> iter = list.iterator();\nwhile (iter.hasNext()) {\n    String s = iter.next();\n    if (s.equals(\"B\")) {\n        iter.remove(); // Safe removal during iteration\n    }\n}\n\n// ListIterator - bidirectional with List-specific features\nList<String> mutableList = new ArrayList<>(Arrays.asList(\"X\", \"Y\", \"Z\"));\nListIterator<String> listIter = mutableList.listIterator();\n\n// Forward traversal\nwhile (listIter.hasNext()) {\n    int index = listIter.nextIndex();\n    String s = listIter.next();\n    if (s.equals(\"Y\")) {\n        listIter.set(\"Y-Modified\"); // Replace current element\n    }\n}\n\n// Backward traversal\nwhile (listIter.hasPrevious()) {\n    int index = listIter.previousIndex();\n    String s = listIter.previous();\n    System.out.println(\"Index \" + index + \": \" + s);\n}\n\n// Start from specific position\nListIterator<String> fromMiddle = mutableList.listIterator(1); // Start at index 1\n\n// Legacy Enumeration (Vector, Hashtable)\nVector<String> vector = new Vector<>(Arrays.asList(\"Old\", \"Legacy\"));\nEnumeration<String> en = vector.elements();\nwhile (en.hasMoreElements()) {\n    String s = en.nextElement();\n    // No remove() method available in Enumeration\n}\n\n// Converting Enumeration to Iterator\nIterator<String> modernIter = Collections.list(en).iterator();"
+            },
+            "codeExplanations": {
+              "english": "Ye code demonstrate karta hai capabilities aur limitations of each iterator type. Standard Iterator example dikhata hai universal pattern applicable to all Collections including Sets aur Queues, with safe removal via remove(). ListIterator examples showcase karta hai iska bidirectional nature: ye maintain karta hai cursor position between elements, allow karta hai nextIndex() aur previousIndex() ko report positions bina consume kiye elements. set() method replace karta hai last element returned by next() ya previous(), enable karta hai in-place modification jo basic Iterator mein impossible hai. Backward traversal example iterate karta hai end se beginning tak using hasPrevious() aur previous(). Starting position constructor dikhata hai listIterator(int index) allow karta hai iteration from any point. Enumeration example dikhata hai legacy interface sirf traversal capabilities ke saath (no removal), aur dikhata hai kaise convert karein modern List using Collections.list() to obtain Iterator."
+            },
+            "keyPoints": [
+              "Iterator provide karta hai universal forward-only traversal for all Collections with hasNext(), next(), aur remove() capabilities, lekin sirf delete support karta hai replacement nahi",
+              "ListIterator extend karta hai Iterator specifically for Lists, offer karta hai bidirectional traversal, element replacement via set(), addition via add(), aur index positioning methods",
+              "Enumeration legacy pre-Collections Framework interface hai jo Vector aur Hashtable use karte hain, provide karta hai sirf forward traversal bina removal capabilities ke, superseded by Iterator",
+              "ListIterator allow karta hai starting from specific index via listIterator(int) aur traverse backward kar sakta hai using hasPrevious() aur previous(), essential hai reverse iteration aur text editor implementations ke liye"
+            ],
+            "extras": {
+              "flowDiagram": "Iterator Cursor Position:\n   Element(0)   Element(1)   Element(2)\n ^      |            |            |      ^ |      |            |            |      |\nhasPrevious()   next() returns    hasNext()\n           previousIndex()   nextIndex()\n\nListIterator set() and add() operate at cursor position:\n- set() replaces last element returned by next/previous\n- add() inserts before the element that would be returned by next()",
+              "comparisonTable": "| Feature | Iterator | ListIterator | Enumeration |\n|---------|----------|--------------|-------------|\n| Direction | Forward only | Bidirectional | Forward only |\n| Remove | Yes | Yes | No |\n| Replace (set) | No | Yes | No |\n| Add during iteration | No | Yes | No |\n| Index information | No | Yes | No |\n| Available on | All Collections | Lists only | Legacy classes |",
+              "examples": []
+            }
+          },
+          {
+            "id": "topic-5-2",
+            "title": "Generics in Collections",
+            "explanations": {
+              "english": "Generics, introduced in Java 5, provide karte hain compile-time type safety for collections by allowing aap specify karein ki kaunsa type of elements wo contain karte hain. Generics ke bagair, collections hold karte thay raw Object types jo dangerous casting require karte the jo fail ho sakte hain runtime pe with ClassCastException. Generics ke saath, compiler enforce karta hai type constraints, eliminating need for explicit casts aur moving type errors from runtime to compile-time jahan wo development ke dauran catch ho jate hain. Generic methods allow karte hain writing type-safe utility methods jo work karte hain across different collection types. Lekin, type erasure ki wajah se, generic type information remove ho jati hai compile-time pe aur replace ho jati hai casts se, meaning runtime type checking (instanceof, getClass()) distinguish nahi kar sakta between List<String> aur List<Integer>. Ye design decision maintain karta hai backward compatibility pre-generics code ke saath lekin impose karta hai limitations jaise inability to create generic arrays ya use primitives as type parameters."
+            },
+            "code": {
+              "title": "Generics Type Safety and Erasure",
+              "language": "java",
+              "content": "// Pre-generics (Java 4 and earlier) - Unsafe\nList rawList = new ArrayList();\nrawList.add(\"string\");\nrawList.add(123); // Compiles, but runtime disaster\nString s = (String) rawList.get(1); // ClassCastException!\n\n// With Generics (Java 5+) - Type safe\nList<String> typedList = new ArrayList<>();\ntypedList.add(\"safe\");\n// typedList.add(123); // Compile-time error!\nString safe = typedList.get(0); // No cast needed, guaranteed String\n\n// Generic methods\npublic static <T> void copyElements(List<T> source, List<T> dest) {\n    for (T element : source) {\n        dest.add(element);\n    }\n}\n\n// Type Erasure demonstration\nList<String> stringList = new ArrayList<>();\nList<Integer> intList = new ArrayList<>();\nSystem.out.println(stringList.getClass() == intList.getClass()); // true!\n// Both are ArrayList.class at runtime, type info erased\n\n// Limitations due to erasure\n// List<String>[] arrayOfLists = new ArrayList<String>[10]; // ILLEGAL\n// Cannot create generic arrays or use instanceof with type parameters\n\n// Wildcards for unknown types\npublic static void printList(List<?> list) {\n    for (Object elem : list) {\n        System.out.println(elem);\n    }\n    // list.add(\"test\"); // Illegal, cannot add to unknown type\n}"
+            },
+            "codeExplanations": {
+              "english": "Ye code contrast karta hai pre-generics aur modern approaches ko. rawList example dikhata hai untyped collections ke dangers jahan koi bhi object add ho sakta hai, leading to potential ClassCastException jab retrieve karte hain. typedList example demonstrate karta hai compile-time enforcement jahan attempt to add Integer to List<String> immediately fail hota hai during compilation, aur retrieval require nahi karta casting kyunki compiler insert karta hai implicit casts. Generic method copyElements dikhata hai <T> syntax declaring type parameter jo kaam karta hai kisi bhi element type ke saath while maintaining type safety between source aur destination lists. Type erasure demonstration reveal karta hai ki runtime pe, List<String> aur List<Integer> identical ArrayList classes hain kyunki generic parameters remove ho jate hain compilation ke dauran; isliye instanceof checks generic types distinguish nahi kar sakte. Commented illegal array creation dikhata hai fundamental limitation: since arrays maintain runtime type information but generics erase ho jate hain, creating arrays of generic types violate karega type safety."
+            },
+            "keyPoints": [
+              "Generics provide karte hain compile-time type checking, eliminating ClassCastException risks aur removing need for explicit casting jab elements retrieve karte hain collections se",
+              "Type erasure remove karta hai generic type information compile-time pe, replace karta hai type parameters unki bounds ya Object se, meaning runtime distinguish nahi kar sakta between List<String> aur List<Integer>",
+              "Generic methods using <T> syntax enable karte hain writing type-safe utility methods jo operate karte hain different types pe while preserving compile-time type constraints across method parameters",
+              "Due to type erasure, aap create nahi kar sakte arrays of generic types (new ArrayList<String>[10]), use nahi kar sakte primitives as type parameters (List<int> illegal hai, use List<Integer>), ya use nahi kar sakte instanceof with generic types"
+            ],
+            "extras": {
+              "flowDiagram": "",
+              "comparisonTable": "| Aspect | Raw Types | Generics |\n|--------|-----------|----------|\n| Compile-time safety | No | Yes |\n| Casting required | Yes, explicit | No, implicit |\n| Type errors | Runtime (ClassCastException) | Compile-time |\n| Backward compatibility | N/A | Maintained via erasure |\n| Primitives support | Yes (auto-boxing) | No (use wrappers) |",
+              "examples": []
+            }
+          },
+          {
+            "id": "topic-5-3",
+            "title": "PECS Principle",
+            "explanations": {
+              "english": "PECS (Producer Extends, Consumer Super) ek mnemonic hai wildcard bounds ke liye generics mein, guide karta hai when to use ? extends T versus ? super T. Producer Extends: Jab collection produce/output karta hai data (aap read karte hain), use karein ? extends T. Ye accept karta hai collections of T ya any subtype (covariance), ensure karta hai ki aap safely read kar sakte hain T objects but cannot safely write unknown subtypes. Consumer Super: Jab collection consume/input karta hai data (aap write karte hain), use karein ? super T. Ye accept karta hai collections of T ya any supertype (contravariance), ensure karta hai ki aap safely write kar sakte hain T objects but reading return karta hai Object requiring casts. Principle explain karta hai kyun Collections.copy(List<? super T> dest, List<? extends T> src) kaam karta hai: source produce karta hai elements (? extends) jo consume hote hain destination (? super) dwara. PECS use karne se API flexibility maximize hoti hai while maintaining type safety, allow karte hain methods ko accept broader ranges of collection types than fixed generic parameters permit karte hain."
+            },
+            "code": {
+              "title": "Producer Extends Consumer Super Patterns",
+              "language": "java",
+              "content": "// PRODUCER EXTENDS: Reading from collection\npublic static double sumOfList(List<? extends Number> list) {\n    double sum = 0;\n    for (Number n : list) { // Can read as Number\n        sum += n.doubleValue();\n    }\n    return sum;\n}\n// Usage: Works with List<Integer>, List<Double>, List<Number>\nsumOfList(Arrays.asList(1, 2, 3)); // Integer extends Number\nsumOfList(Arrays.asList(1.5, 2.5)); // Double extends Number\n\n// CONSUMER SUPER: Writing to collection\npublic static void addNumbers(List<? super Integer> list) {\n    list.add(1); // Safe to add Integer\n    list.add(2);\n    // Integer is-a ? super Integer (could be Number or Object)\n    // Object element = list.get(0); // Can only read as Object\n}\n// Usage: Works with List<Integer>, List<Number>, List<Object>\nList<Number> numbers = new ArrayList<>();\naddNumbers(numbers); // Number super Integer\n\n// PECS in practice: Collections.copy\npublic static <T> void copy(List<? super T> dest, List<? extends T> src) {\n    for (T item : src) { // src produces T (extends)\n        dest.add(item);   // dest consumes T (super)\n    }\n}\n\n// Common mistake: Using wrong bound\npublic static void badAdd(List<? extends Number> list) {\n    // list.add(1); // ILLEGAL: Could be List<Double>, can't add Integer\n}\n\npublic static void badGet(List<? super Integer> list) {\n    Integer i = list.get(0); // ILLEGAL: Returns Object, requires cast\n    Object o = list.get(0);  // Legal but loses type information\n}"
+            },
+            "codeExplanations": {
+              "english": "Ye examples illustrate karte hain PECS through practical examples. sumOfList method use karta hai ? extends Number kyunki wo list se read karta hai (producer), allow karta hai accept List<Integer>, List<Double>, ya any Number subtype. Inside, elements guaranteed hain at least Number hone ke, toh doubleValue() call ho sakta hai, but list modify nahi ho sakti kyunki actual type specific subtype ho sakta hai (aap Integer add nahi kar sakte List<Double> mein). addNumbers method use karta hai ? super Integer kyunki wo list mein write karta hai (consumer), allow karta hai List<Integer>, List<Number>, ya List<Object>. Integer likhna safe hai kyunki Integer instance hai kisi bhi supertype ka, but reading return karta hai Object kyunki actual element type koi bhi supertype of Integer ho sakta hai. copy method demonstrate karta hai PECS perfectly: src use karta hai extends kyunki wo produce karta hai elements, dest use karta hai super kyunki wo consume karta hai elements. Bad examples dikhate hain violations: aap add nahi kar sakte extends list mein (type safety break ho sakti hai) aur aap specific types get nahi kar sakte super list se (sirf Object)."
+            },
+            "keyPoints": [
+              "Producer Extends (? extends T): Use karein jab collection se read karte hain; accept karta hai T aur subtypes, guarantee karta hai ki aap read kar sakte hain T but cannot safely write to collection",
+              "Consumer Super (? super T): Use karein jab collection mein write karte hain; accept karta hai T aur supertypes, guarantee karta hai ki aap write kar sakte hain T but reading return karta hai Object requiring casts",
+              "PECS maximize karta hai API flexibility by using covariance (extends) for inputs aur contravariance (super) for outputs, making methods accept wider ranges of collection types",
+              "Collections.copy() exemplify karta hai PECS: destination use karta hai ? super T (consumes elements), source use karta hai ? extends T (produces elements), enable karta hai copying between related but different concrete types"
+            ],
+            "extras": {
+              "flowDiagram": "",
+              "comparisonTable": "| Bound | Can Read | Can Write | Use Case |\n|-------|----------|-----------|----------|\n| ? extends T | T (guaranteed) | Nothing (unsafe) | Producer/Input/Source |\n| ? super T | Object only | T (guaranteed) | Consumer/Output/Destination |\n| ? (unbounded) | Object only | Nothing | Read-only, type unknown |",
+              "examples": [
+                "Producer: public void drawAll(List<? extends Shape> shapes) - reads and draws any Shape subtype",
+                "Consumer: public void addTo(List<? super Shape> list) - adds Shapes to list of Shape or Object",
+                "Both: copying from List<Circle> to List<Shape> requires ? extends Circle source and ? super Shape destination"
+              ]
+            }
+          },
+          {
+            "id": "topic-5-4",
+            "title": "Comparable vs Comparator",
+            "explanations": {
+              "english": "Comparable aur Comparator do mechanisms hain object ordering define karne ke liye Java mein. Comparable define karta hai natural ordering of a class by having the class implement compareTo(), establishing default sort order intrinsic to the type (e.g., String sort hota hai alphabetically, Integer numerically). Ek class sirf ek natural ordering rakh sakti hai via Comparable. Comparator provide karta hai external comparison logic via compare(), allow karta hai multiple sorting strategies for same class bina modify kiye. Comparator essential hai jab aap source class modify nahi kar sakte (third-party libraries), jab aapko multiple ordering options chahiye (e.g., sort Employees by name OR salary OR hire date), ya jab natural ordering inappropriate ho. Comparators chain ho sakte hain using thenComparing() for multi-level sorting, aur concisely instantiate kiye ja sakte hain using lambda expressions ya method references since Java 8. Key difference: Comparable internal hai class ke andar (single ordering), Comparator external hai (multiple strategies)."
+            },
+            "code": {
+              "title": "Natural and Custom Ordering Strategies",
+              "language": "java",
+              "content": "// Comparable - Natural ordering (intrinsic to class)\npublic class Employee implements Comparable<Employee> {\n    private String name;\n    private double salary;\n    private LocalDate hireDate;\n    \n    @Override\n    public int compareTo(Employee other) {\n        return this.name.compareTo(other.name); // Natural: alphabetical by name\n    }\n}\n\n// Usage: Automatic sorting\nList<Employee> staff = getEmployees();\nCollections.sort(staff); // Uses Comparable.compareTo()\n\n// Comparator - External, multiple strategies\n// Strategy 1: Sort by salary\nComparator<Employee> bySalary = Comparator.comparingDouble(Employee::getSalary);\n\n// Strategy 2: Sort by hire date (reverse)\nComparator<Employee> byHireDateDesc = Comparator.comparing(Employee::getHireDate).reversed();\n\n// Strategy 3: Multi-level sorting\nComparator<Employee> byDeptThenSalary = Comparator\n    .comparing(Employee::getDepartment)\n    .thenComparing(Employee::getSalary);\n\n// Java 8+ concise syntax\nstaff.sort(Comparator.comparing(Employee::getName));\nstaff.sort((e1, e2) -> Double.compare(e1.getSalary(), e2.getSalary()));\n\n// Third-party class cannot be modified - use Comparator\nList<String> names = Arrays.asList(\"Bob\", \"ALICE\", \"Charlie\");\nnames.sort(String::compareToIgnoreCase); // External ordering without modifying String\n\n// Null handling\nComparator<Employee> nullSafe = Comparator.nullsFirst(Comparator.comparing(Employee::getName));\n\n// TreeSet/TreeMap with custom Comparator\nTreeSet<Employee> salarySet = new TreeSet<>(bySalary); // Orders by salary, not name"
+            },
+            "codeExplanations": {
+              "english": "Ye code demonstrate karta hai dono ordering mechanisms. Employee class implement karta hai Comparable natural alphabetical ordering by name define karne ke liye, allow karta hai Collections.sort() bina explicit comparator ke kaam karne. Comparator examples dikhate hain external strategies: bySalary use karta hai method reference double values extract karne ke liye, byHireDateDesc chain karta hai reversed() descending order ke liye, aur byDeptThenSalary demonstrate karta hai multi-level sorting jahan employees pehle group hote hain by department then sort hote hain by salary within each group. Java 8+ syntax dikhata hai lambda aur method reference shorthand comparators create karne ke liye concisely. String example dikhata hai Comparator use karna classes pe jo aap modify nahi kar sakte (final classes like String ya third-party classes). nullSafe example use karta hai Comparator.nullsFirst potential null values handle karne ke liye bina NullPointerException ke. Finally, passing Comparator to TreeSet constructor dikhata hai kaise override karein natural ordering sorted collections mein."
+            },
+            "keyPoints": [
+              "Comparable define karta hai natural ordering intrinsic to a class via compareTo(); ek class sirf ek baar Comparable implement kar sakti hai, establishing uska default sort order",
+              "Comparator define karta hai external ordering strategies via compare(), allow karta hai multiple different sort orders for same class bina uske source code modify kiye",
+              "Use karein Comparable for primary, obvious ordering (e.g., alphabetical for names, chronological for dates); use karein Comparator for alternative orderings ya jab class modify nahi ho sakti",
+              "Comparators chain ho sakte hain with thenComparing() for multi-level sorts aur decorate kiye ja sakte hain nullsFirst/nullsLast ke saath null safety ke liye, offer karte hain flexibility jo single Comparable implementations mein impossible hai"
+            ],
+            "extras": {
+              "flowDiagram": "",
+              "comparisonTable": "| Aspect | Comparable | Comparator |\n|--------|------------|------------|\n| Location | Inside class | Outside class (anywhere) |\n| Method | compareTo() | compare() |\n| Number per class | One (natural order) | Unlimited (strategies) |\n| Modify source | Required | Not required |\n| Lambda compatible | No | Yes (functional interface) |\n| TreeSet/TreeMap | Default ordering | Custom ordering via constructor |",
+              "examples": [
+                "Comparable: Student ordering by student ID (primary key)",
+                "Comparator: Student ordering by GPA (secondary view), then by last name",
+                "Comparator: Sorting legacy database records by multiple timestamp fields"
+              ]
+            }
+          },
+          {
+            "id": "topic-5-5",
+            "title": "Collections Utility Class",
+            "explanations": {
+              "english": "Collections utility class provide karta hai static methods for operating on aur transforming collections. Sorting methods include sort() for List ordering (using merge sort ya TimSort), binarySearch() for O(log n) lookup in sorted lists, aur reverse() for in-place reversal. Shuffling randomly permute karta hai list elements using specified ya default Random instance, useful for simulations aur games. Wrapping methods create synchronized, unmodifiable, ya checked views of collections jo delegate karte hain underlying collection ko while adding specific constraints. Finding extremities (min/max) return karta hai smallest ya largest element according to natural ordering ya Comparator. copy() method copy karta hai elements between lists with PECS wildcards for type flexibility. Ye utilities reduce karte hain boilerplate code aur provide karte hain optimized implementations of common algorithms jo error-prone hote manually write karne mein, jaise binary search handling negative return values insertion points indicate karne ke liye."
+            },
+            "code": {
+              "title": "Common Collections Utilities",
+              "language": "java",
+              "content": "// Sorting\nList<String> names = new ArrayList<>(Arrays.asList(\"Charlie\", \"Alice\", \"Bob\"));\nCollections.sort(names); // Natural order [Alice, Bob, Charlie]\nCollections.sort(names, Collections.reverseOrder()); // Descending\n\n// Binary Search (list must be sorted)\nList<Integer> numbers = Arrays.asList(10, 20, 30, 40, 50);\nint index = Collections.binarySearch(numbers, 30); // Returns 2\nint insertionPoint = Collections.binarySearch(numbers, 25); // Returns -(2+1) = -3\n\n// Reversal and Shuffling\nCollections.reverse(names); // In-place reversal\nCollections.shuffle(names); // Random permutation\nCollections.shuffle(names, new Random(42)); // Reproducible shuffle\n\n// Min/Max\nString first = Collections.min(names); // Alphabetical first\nString last = Collections.max(names, Comparator.comparing(String::length)); // Longest\n\n// Unmodifiable wrappers\nList<String> unmodifiable = Collections.unmodifiableList(names);\n// unmodifiable.add(\"test\"); // Throws UnsupportedOperationException\n\n// Synchronized wrappers (coarse-grained)\nList<String> threadSafe = Collections.synchronizedList(new ArrayList<>());\n\n// Singleton collections\nSet<String> singleton = Collections.singleton(\"only\");\nList<String> empty = Collections.emptyList();\n\n// Filling and copying\nCollections.fill(names, \"DEFAULT\"); // Replace all elements\nList<String> dest = new ArrayList<>(Collections.nCopies(names.size(), \"\"));\nCollections.copy(dest, names); // Copy src to dest, dest must be large enough\n\n// Frequency counting\nint freq = Collections.frequency(names, \"Alice\"); // Count occurrences\n\n// Disjoint check\nboolean noCommon = Collections.disjoint(list1, list2); // True if no elements in common"
+            },
+            "codeExplanations": {
+              "english": "Ye code demonstrate karta hai essential Collections utilities. sort() method use karta hai TimSort (hybrid of merge sort aur insertion sort) provide karte hue O(n log n) stability. binarySearch() require karta hai sorted input aur return karta hai either found index ya (-(insertion point) - 1) missing elements ke liye, allow karta hai both lookup aur insertion point determination. reverse() aur shuffle() operate karte hain in-place memory efficiency ke liye; shuffle() accept karta hai Random seed reproducible randomization ke liye useful in testing. min/max examples dikhate hain overloads using natural ordering versus custom comparators. unmodifiableList wrapper create karta hai view jo throw karta hai UnsupportedOperationException modification attempts pe, although underlying list mutable rehti hai (defensive copying required true immutability ke liye). synchronizedList wrapper add karta hai method-level synchronization (less efficient than concurrent collections lekin compatible with legacy code). singleton aur emptyList factory methods provide karte hain immutable, type-safe shared instances special cases ke liye bina new objects create kiye. copy() method require karta hai destination at least as large as source, unlike List.addAll()."
+            },
+            "keyPoints": [
+              "Collections.sort() use karta hai TimSort (stable O(n log n)) for Lists, jabki Collections.binarySearch() provide karta hai O(log n) lookup on sorted lists return karte hue insertion points for missing elements",
+              "Collections.unmodifiableXXX() create karta hai read-only views jo throw karte hain exceptions on modification attempts, but reflect karte hain changes to underlying mutable collection",
+              "Collections.synchronizedXXX() provide karta hai thread-safe wrappers with method-level locking, suitable for legacy code lekin outperformed by modern concurrent collections like CopyOnWriteArrayList",
+              "Collections.shuffle() randomly permute karta hai lists for simulations aur games, aur utility methods jaise frequency(), disjoint(), min(), aur max() provide karte hain optimized implementations of common collection algorithms"
+            ],
+            "extras": {
+              "flowDiagram": "",
+              "comparisonTable": "| Method | Purpose | Complexity |\n|--------|---------|------------|\n| sort() | Order elements | O(n log n) |\n| binarySearch() | Find element | O(log n) |\n| reverse() | Reverse order | O(n) |\n| shuffle() | Random permutation | O(n) |\n| min/max() | Find extremes | O(n) |\n| frequency() | Count occurrences | O(n) |\n| copy() | Copy between lists | O(n) |",
+              "examples": [
+                "Game development: shuffle() for card decks, binarySearch() for high-score lookups",
+                "Defensive programming: unmodifiableList() returning internal list views to prevent external modification",
+                "Legacy integration: synchronizedMap() wrapping HashMap for simple thread-safe maps in older codebases"
+              ]
+            }
+          },
+          {
+            "id": "topic-5-6",
+            "title": "Immutable Collections & Common Mistakes",
+            "explanations": {
+              "english": "Immutability in collections ka matlab hai ki structure aur elements modify nahi ho sakte creation ke baad, provide karte hue thread safety aur defensive programming benefits. Java offer karta hai multiple approaches with different guarantees. Collections.unmodifiableXXX() return karta hai read-only views existing collections ke, lekin ye shallow immutability wrappers hain jo reflect karte hain changes to underlying collection aur allow karte hain modification of mutable elements within. True immutality require karta hai creating copies (e.g., via copy constructors) before wrapping. Java 9+ introduce kiya factory methods List.of(), Set.of(), aur Map.of() jo create karte hain truly immutable collections jo reject karte hain all modification attempts aur optimize memory for small collections (storing elements directly bina node overhead). Common mistakes include returning internal mutable collections directly from classes (breaking encapsulation), assuming unmodifiable collections protect mutable element objects (wo sirf structural changes prevent karte hain), using concurrent collections unnecessarily for read-only data (wasting memory on synchronization overhead), aur attempting to modify collections during iteration (causing ConcurrentModificationException even without other threads)."
+            },
+            "code": {
+              "title": "Immutability Patterns and Pitfalls",
+              "language": "java",
+              "content": "// APPROACH 1: Unmodifiable view (shallow immutability)\nList<String> mutable = new ArrayList<>(Arrays.asList(\"A\", \"B\"));\nList<String> unmodifiable = Collections.unmodifiableList(mutable);\n// unmodifiable.add(\"C\"); // UnsupportedOperationException\nmutable.add(\"C\"); // Modifies underlying list, visible in unmodifiable view!\nSystem.out.println(unmodifiable); // [A, B, C] - Changed!\n\n// DEFENSIVE COPY: True immutability\npublic List<String> getItems() {\n    return Collections.unmodifiableList(new ArrayList<>(internalList));\n    // Return copy, original safe from external modification\n}\n\n// APPROACH 2: Java 9+ Immutable factories (true immutability)\nList<String> immutableList = List.of(\"A\", \"B\", \"C\");\nSet<String> immutableSet = Set.of(\"A\", \"B\", \"C\");\nMap<String, Integer> immutableMap = Map.of(\"Key\", 1, \"Key2\", 2);\nMap<String, Integer> mapOfEntries = Map.ofEntries(\n    Map.entry(\"K1\", 1),\n    Map.entry(\"K2\", 2)\n);\n// immutableList.add(\"D\"); // UnsupportedOperationException\n// No underlying collection to modify - truly immutable\n\n// COMMON MISTAKE 1: Modifying during iteration\nList<String> list = new ArrayList<>(Arrays.asList(\"A\", \"B\", \"C\"));\nfor (String s : list) {\n    if (s.equals(\"B\")) list.remove(s); // ConcurrentModificationException!\n}\n\n// CORRECT: Use iterator\nIterator<String> iter = list.iterator();\nwhile (iter.hasNext()) {\n    if (iter.next().equals(\"B\")) iter.remove();\n}\n\n// COMMON MISTAKE 2: Assuming unmodifiable protects element mutability\nList<StringBuilder> builders = new ArrayList<>();\nbuilders.add(new StringBuilder(\"Hello\"));\nList<StringBuilder> unmod = Collections.unmodifiableList(builders);\nunmod.get(0).append(\" World\"); // Works! Element is mutable\n\n// COMMON MISTAKE 3: Unnecessary concurrent collections\nMap<String, Config> config = new ConcurrentHashMap<>(); // Overkill if read-only after setup\n// Better: Populate HashMap, then wrap with unmodifiableMap or use Map.copyOf()"
+            },
+            "codeExplanations": {
+              "english": "Ye code illustrate karta hai immutability approaches aur pitfalls. First example dikhata hai ki unmodifiableList sirf wrapper ke through modifications prevent karta hai; original mutable list mein changes propagate hote hain view tak, demonstrate karte hue shallow immutability. Defensive copy pattern create karta hai new ArrayList before wrapping, ensure karta hai returned collection independent hai internal state se. Java 9+ factory methods create karte hain truly immutable collections optimized storage ke saath (no internal node objects for Lists up to 2 elements, specialized Set implementations jo prevent karte hain duplicates at creation time). Concurrent modification example dikhata hai common foreach remove mistake jo fail-fast exceptions cause karta hai, contrasted with correct iterator remove pattern. StringBuilder example demonstrate karta hai ki unmodifiable collections sirf structural changes prevent karte hain (add/remove) but allow karte hain stored objects ki mutation agar wo mutable hain, requiring immutable objects store karna (String instead of StringBuilder) ya deep copying true safety ke liye. Final example warn karta hai against using concurrent collections for data jo sirf initialization ke dauran modify hota hai then read thereafter, suggest karta hai wrapping with unmodifiable views after setup for better performance."
+            },
+            "keyPoints": [
+              "Collections.unmodifiableXXX() provide karte hain read-only views but reflect karte hain changes to underlying collection aur allow karte hain modification of mutable elements, requiring defensive copying for true encapsulation",
+              "Java 9+ factory methods List.of(), Set.of(), Map.of() create karte hain truly immutable collections optimized for small sizes with zero structural modification overhead aur no backing mutable collection",
+              "Unmodifiable collections prevent karte hain structural changes (add/remove/clear) but prevent nahi karte stored objects within ki mutation, requiring immutable element types ya deep copying complete safety ke liye",
+              "Common mistakes include modifying collections during enhanced for-loops (causing ConcurrentModificationException), using concurrent collections for effectively immutable data (wasting memory), aur assuming unmodifiable wrappers provide deep immutability"
+            ],
+            "extras": {
+              "flowDiagram": "",
+              "comparisonTable": "| Approach | Structural Changes | Element Mutability | Memory Overhead | Thread-Safe |\n|----------|-------------------|-------------------|-----------------|-------------|\n| unmodifiableList | Blocked (throws) | Allowed | Low (wrapper) | No (underlying mutable) |\n| List.of() | Blocked (throws) | Depends on element | Minimal (optimized) | Yes (immutable) |\n| CopyOnWriteArrayList | Allowed (copy-on-write) | Allowed | High (copies on write) | Yes |\n| new ArrayList<>(immutable) | Allowed | Allowed | Standard | No |",
+              "examples": [
+                "Configuration constants: List.of() for small fixed lists of application settings",
+                "API return values: Defensive unmodifiableList(new ArrayList<>(internal)) to prevent external modification",
+                "Caching: Immutable map keys prevent accidental cache corruption by callers"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "section-6",
+        "title": "Concurrency, Performance & Internals",
+        "topics": [
+          {
+            "id": "topic-6-1",
+            "title": "Synchronized Collections",
+            "explanations": {
+              "english": "Synchronized collections create kiye jate hain using Collections.synchronizedXXX() factory methods, jo wrap karte hain standard collections ko synchronized method blocks ke saath using wrapper object ka intrinsic lock (monitor). Har method call acquire karta hai ye single lock for entire duration of operation, making them thread-safe lekin poorly scalable under contention. Jabki individual operations jaise get() aur put() atomic hain, compound operations jaise iteration ya check-then-act sequences (if (!map.containsKey(k)) map.put(k, v)) require manual external synchronization on collection object to remain thread-safe. Ye wrappers provide quick fix legacy code concurrency issues ke liye lekin suffer karte hain coarse-grained locking se jo effectively serialize karta hai all access, making them unsuitable for high-throughput concurrent scenarios jahan ConcurrentHashMap ya CopyOnWriteArrayList significantly better perform karte hain."
+            },
+            "code": {
+              "title": "Synchronized Wrapper Usage and Limitations",
+              "language": "java",
+              "content": "// Creating synchronized wrappers\nList<String> syncList = Collections.synchronizedList(new ArrayList<>());\nMap<String, Integer> syncMap = Collections.synchronizedMap(new HashMap<>());\nSet<String> syncSet = Collections.synchronizedSet(new HashSet<>());\n\n// Thread-safe for individual operations\nsyncList.add(\"item\"); // Synchronized internally\nString item = syncList.get(0); // Synchronized internally\n\n// COMPOUND OPERATIONS REQUIRE EXTERNAL SYNCHRONIZATION\n// Dangerous - race condition between contains and add\nif (!syncList.contains(\"newItem\")) {\n    syncList.add(\"newItem\"); // Another thread may have added between check and add\n}\n\n// Correct - synchronize on the collection\nsynchronized (syncList) {\n    if (!syncList.contains(\"newItem\")) {\n        syncList.add(\"newItem\");\n    }\n}\n\n// Iteration requires synchronization\nsynchronized (syncList) {\n    for (String s : syncList) {\n        System.out.println(s);\n    }\n}\n\n// Performance comparison with concurrent collections\n// Single thread: Similar performance\n// Multiple threads: Throughput collapses due to lock contention\n// All threads serialize through the same monitor"
+            },
+            "codeExplanations": {
+              "english": "Ye code demonstrate karta hai synchronized wrapper creation aur critical usage patterns. First examples dikhate hain simple factory method usage creating thread-safe views of ArrayList, HashMap, aur HashSet. Dangerous compound operation example illustrate karta hai classic race condition: contains() check aur add() execution ke beech, doosra thread list modify kar sakta hai, causing duplicate insertion ya logic errors despite individual method synchronization. Corrected version wrap karta hai entire check-then-act sequence in synchronized block on collection itself, ensure karta hai atomicity. Iteration example show compulsory synchronization ConcurrentModificationException prevent karne ke liye agar doosra thread loop ke dauran list modify kare. Performance comment explain karta hai ki jabki functional hain, synchronized wrappers create karte hain bottlenecks kyunki unka single lock force karta hai saari threads ko queue karne for access, unlike concurrent collections jo parallel reads allow karte hain."
+            },
+            "keyPoints": [
+              "Collections.synchronizedXXX() wrappers provide thread safety by synchronizing every method on wrapper's intrinsic lock, making individual operations atomic lekin compound operations unsafe without additional synchronization",
+              "Coarse-grained locking force karta hai saari threads ko serialize access, causing throughput significantly degrade under concurrent load compared to fine-grained ya lock-free concurrent collections",
+              "Synchronized collections pe iteration must be manually synchronized on collection object to prevent ConcurrentModificationException from concurrent structural modifications by other threads",
+              "Synchronized wrappers suitable hain legacy code migration aur low-concurrency scenarios ke liye lekin replace karne chahiye java.util.concurrent collections se for high-performance multi-threaded applications"
+            ],
+            "extras": {
+              "flowDiagram": "Thread 1: acquire lock -> read -> modify -> release lock\nThread 2:          wait... -> acquire lock -> read -> release\nThread 3:                   wait... -> acquire lock -> ...\n\nMonitor Queue: Single bottleneck for all operations",
+              "comparisonTable": "| Characteristic | Synchronized Wrappers | ConcurrentHashMap | CopyOnWriteArrayList |\n|----------------|---------------------|-------------------|---------------------|\n| Locking | Single coarse lock | Fine-grained (buckets) | ReentrantLock on write |\n| Read concurrency | Sequential | Parallel (lock-free) | Parallel (no locks) |\n| Write concurrency | Sequential | Parallel (per bucket) | Sequential (copy) |\n| Iteration | Fail-fast, requires sync | Weakly consistent | Snapshot (no sync) |",
+              "examples": []
+            }
+          },
+          {
+            "id": "topic-6-2",
+            "title": "Concurrent Collections",
+            "explanations": {
+              "english": "java.util.concurrent package provide karta hai collections designed for high-concurrency scenarios bina coarse locking ke synchronized wrappers ke. ConcurrentHashMap use karta hai fine-grained locking (bucket-level ya CAS operations) allow karte hue parallel reads aur writes across different segments. CopyOnWriteArrayList create karta hai new array copy on every write operation (add/set/remove) jabki reads operate karte hain immutable snapshot pe bina locking, making it ideal for read-heavy scenarios jaise event listener lists. ConcurrentLinkedQueue ek lock-free, non-blocking queue hai using CAS algorithms for both FIFO operations. BlockingQueue implementations (ArrayBlockingQueue, LinkedBlockingQueue) add karte hain blocking put() aur take() methods with optional capacity constraints, essential for producer-consumer patterns. Ye collections provide weakly consistent iterators jo reflect karte hain collection state at some point during iteration bina throwing ConcurrentModificationException, aur offer karte hain atomic compound operations jaise putIfAbsent aur replace jo eliminate karte hain check-then-act race conditions."
+            },
+            "code": {
+              "title": "Concurrent Collections Usage Patterns",
+              "language": "java",
+              "content": "// ConcurrentHashMap - fine-grained locking\nConcurrentHashMap<String, Integer> concurrentMap = new ConcurrentHashMap<>();\nconcurrentMap.put(\"key\", 100);\nconcurrentMap.computeIfAbsent(\"key2\", k -> expensiveComputation()); // Atomic\nconcurrentMap.merge(\"counter\", 1, Integer::sum); // Atomic increment\n\n// CopyOnWriteArrayList - read-heavy scenarios\nCopyOnWriteArrayList<Listener> listeners = new CopyOnWriteArrayList<>();\nlisteners.add(new Listener()); // Creates copy, locks briefly\n// Iteration uses snapshot, no locking, no ConcurrentModificationException\nfor (Listener l : listeners) {\n    l.onEvent(event); // Iterates over snapshot at iteration start\n}\n\n// ConcurrentLinkedQueue - lock-free FIFO\nConcurrentLinkedQueue<String> queue = new ConcurrentLinkedQueue<>();\nqueue.offer(\"task\"); // Non-blocking\nString task = queue.poll(); // Returns null if empty, non-blocking\n\n// BlockingQueue - producer-consumer with backpressure\nBlockingQueue<String> blockingQueue = new LinkedBlockingQueue<>(100); // Capacity 100\ntry {\n    blockingQueue.put(\"item\"); // Blocks if queue is full\n    String item = blockingQueue.take(); // Blocks if queue is empty\n} catch (InterruptedException e) {\n    Thread.currentThread().interrupt();\n}\n\n// Thread-safe counters without external synchronization\nConcurrentHashMap<String, LongAdder> counters = new ConcurrentHashMap<>();\ncounters.computeIfAbsent(\"clicks\", k -> new LongAdder()).increment();\n\n// Weakly consistent iteration (may reflect concurrent changes)\nIterator<String> iter = concurrentMap.keySet().iterator();\nwhile (iter.hasNext()) {\n    String key = iter.next();\n    concurrentMap.remove(key); // No ConcurrentModificationException\n}"
+            },
+            "codeExplanations": {
+              "english": "Ye code demonstrate karta hai concurrent collection capabilities. ConcurrentHashMap dikhata hai atomic compute methods jo perform karte hain complex read-modify-write operations bina race conditions ke. CopyOnWriteArrayList illustrate karta hai publish-subscribe pattern jahan writes create karte hain new array copies (expensive for writes, O(n) per modification) lekin reads completely lock-free hain aur iteration use karta hai immutable snapshots, preventing concurrent modification issues. ConcurrentLinkedQueue demonstrate karta hai lock-free algorithms using CAS (Compare-And-Swap) for wait-free queue operations. BlockingQueue example dikhata hai producer-consumer pattern jahan put() block karta hai jab full (backpressure) aur take() block karta hai jab empty (waiting for work), essential for load management. LongAdder example (from java.util.concurrent.atomic) used within ConcurrentHashMap dikhata hai high-performance counter pattern jo contention reduce karta hai by splitting counter across cells. Finally, weakly consistent iteration demonstrate karta hai ki unlike fail-fast iterators, concurrent collection iterators tolerate karte hain modifications during traversal bina exceptions ke."
+            },
+            "keyPoints": [
+              "ConcurrentHashMap provide karta hai lock-free reads aur fine-grained bucket locking for writes, supporting high-concurrency access with atomic compound operations (compute, merge, putIfAbsent)",
+              "CopyOnWriteArrayList create karta hai immutable array snapshots for iteration, making reads aur traversals completely lock-free at cost of O(n) array copying for every write operation",
+              "BlockingQueue implementations provide karte hain blocking put() aur take() methods essential for producer-consumer patterns, with ArrayBlockingQueue using circular array aur LinkedBlockingQueue using linked nodes",
+              "Concurrent collections provide weakly consistent iterators jo throw nahi karte ConcurrentModificationException aur allow karte hain concurrent structural modifications during iteration"
+            ],
+            "extras": {
+              "flowDiagram": "CopyOnWriteArrayList Write:\n1. Acquire lock\n2. Copy underlying array (O(n))\n3. Modify copy\n4. Set reference to new array (volatile write)\n5. Release lock\n\nConcurrentHashMap Read:\n1. volatile read of table reference\n2. Calculate bucket index\n3. volatile read of bucket node\n4. Traverse (lock-free)",
+              "comparisonTable": "| Collection | Best For | Avoid When |\n|------------|----------|------------|\n| ConcurrentHashMap | High-concurrency reads/writes | Single-threaded (overhead) |\n| CopyOnWriteArrayList | Read-heavy, few writes | Write-heavy (O(n) per write) |\n| ConcurrentLinkedQueue | Non-blocking FIFO | Need blocking/backpressure |\n| BlockingQueue | Producer-consumer | Non-blocking required |\n| ConcurrentSkipListMap | Concurrent sorted data | Unsorted data |",
+              "examples": [
+                "Event bus: CopyOnWriteArrayList for listener registration (rare updates, frequent broadcasts)",
+                "Connection pool: ArrayBlockingQueue with capacity limit for managing limited resources",
+                "Real-time analytics: ConcurrentHashMap with LongAdder for hit counters across threads"
+              ]
+            }
+          },
+          {
+            "id": "topic-6-3",
+            "title": "Big-O Complexity Cheat Sheet",
+            "explanations": {
+              "english": "Big-O complexity samajhna essential hai appropriate collections select karne ke liye based on performance requirements. ArrayList provide karta hai O(1) random access lekin O(n) insertion/deletion middle mein due to element shifting. LinkedList offer karta hai O(1) insertion at known positions lekin O(n) random access kyunki traverse karna padta hai head ya tail se. HashSet aur HashMap provide karte hain O(1) average case for add, remove, aur contains/put assuming good hash distribution, degrade kar sakta hai O(log n) mein Java 8+ for pathological cases due to treeification. TreeSet aur TreeMap guarantee karte hain O(log n) for all operations due to Red-Black tree balancing. PriorityQueue offer karta hai O(log n) offer/poll lekin O(1) peek. Space complexity bhi vary karti hai: ArrayList ka O(n) compact storage, LinkedList ka O(n) with high per-node overhead, jabki HashMap require karta hai O(n) plus table overhead (typically 2x expected entries load factor maintain karne ke liye). Galat structure choose karna aapke access pattern ke liye (e.g., indexed iteration over LinkedList) performance degrade kar sakta hai O(n) se O(n²)."
+            },
+            "code": {
+              "title": "Complexity Analysis Reference",
+              "language": "java",
+              "content": "// LIST OPERATIONS\nArrayList<String> arrayList = new ArrayList<>();\n// get(index):     O(1) - Array indexing\n// add(end):       O(1) amortized, O(n) worst case (resize)\n// add(middle):    O(n) - Must shift elements\n// remove(middle): O(n) - Must shift elements\n// contains:       O(n) - Linear search\n// space:          O(n) - Compact array\n\nLinkedList<String> linkedList = new LinkedList<>();\n// get(index):     O(n) - Must traverse (optimized from nearest end)\n// add(end):       O(1) - Update tail pointer\n// add(middle):    O(n) to find, O(1) to insert with iterator\n// remove(middle): O(n) to find, O(1) with iterator\n// contains:       O(n) - Linear traversal\n// space:          O(n) - High per-node overhead (next + prev pointers)\n\n// SET OPERATIONS\nHashSet<String> hashSet = new HashSet<>();\n// add:      O(1) average, O(log n) worst (treeification)\n// contains: O(1) average, O(log n) worst\n// remove:   O(1) average, O(log n) worst\n// iteration: O(n) - Hash order\n// space:    O(n) with load factor overhead (~1.33x expected size)\n\nTreeSet<String> treeSet = new TreeSet<>();\n// add:      O(log n) - Red-Black tree insertion\n// contains: O(log n) - Tree traversal\n// remove:   O(log n) - Tree deletion with rebalancing\n// iteration: O(n) - Sorted order\n// space:    O(n) - Tree node overhead\n\n// MAP OPERATIONS mirror their Set counterparts\n// HashMap: O(1) avg for put/get/remove\n// TreeMap: O(log n) for put/get/remove\n// ConcurrentHashMap: O(1) optimistic for get, synchronized for writes\n\n// QUEUE OPERATIONS\nPriorityQueue<String> pq = new PriorityQueue<>();\n// offer: O(log n) - Heap sift-up\n// poll:  O(log n) - Heap sift-down\n// peek:  O(1) - Root access"
+            },
+            "codeExplanations": {
+              "english": "Ye code provide karta hai comprehensive complexity reference through comments. ArrayList complexities highlight karte hain trade-off between fast random access aur slow middle modifications due to System.arraycopy() shifting. LinkedList show karta hai inverse: no random access lekin constant-time modification with iterator positioning. HashSet document karta hai Java 8 ki treeification improvement prevent karte hue O(n) worst case, jabki maintaining O(1) average case assumptions require karte hain good hashCode() distribution. TreeSet confirm karta hai logarithmic bounds for balanced trees. Space complexity notes crucial hain: HashMap ka load factor mean karta hai capacity typically size se 33% zyada hoti hai, jabki LinkedList ke node objects (object header + do pointers + element reference) consume kar sakte hain 3-4x zyada memory than ArrayList per element. PriorityQueue clarify karta hai ki jabki ordering maintain karta hai, ye sorted structure nahi hai; peek O(1) hai lekin arbitrary elements retrieval require karta hai O(n) traversal."
+            },
+            "keyPoints": [
+              "ArrayList provide karta hai O(1) indexed access lekin O(n) insertions/deletions middle mein due to element shifting, making it ideal for random access read-heavy workloads",
+              "HashMap/HashMap provide karte hain O(1) average case operations lekin require karte hain hashCode() quality; TreeMap/TreeMap provide karte hain guaranteed O(log n) regardless of input distribution",
+              "LinkedList significantly zyada memory consume karta hai per element than ArrayList due to node object overhead (next/prev pointers), aur indexed access O(n) hai making it unsuitable for random access patterns",
+              "PriorityQueue offer karta hai O(log n) insertion aur extraction lekin maintain karta hai only partial ordering (heap property), not full sorted order; finding arbitrary elements O(n) hai"
+            ],
+            "extras": {
+              "flowDiagram": "",
+              "comparisonTable": "| Operation | ArrayList | LinkedList | HashSet | TreeSet | HashMap | TreeMap |\n|-----------|-----------|------------|---------|---------|---------|---------|\n| Get by index | O(1) | O(n) | - | - | O(1) | O(log n) |\n| Search | O(n) | O(n) | O(1) | O(log n) | O(1) | O(log n) |\n| Insert | O(n) | O(1)* | O(1) | O(log n) | O(1) | O(log n) |\n| Delete | O(n) | O(1)* | O(1) | O(log n) | O(1) | O(log n) |\n| Memory | Low | High | Medium | Medium | Medium | Medium |\n\n* With iterator positioning",
+              "examples": [
+                "Algorithm optimization: Using HashSet for O(1) lookups in two-sum problem instead of O(n²) nested loops",
+                "Real-time systems: TreeMap for guaranteed O(log n) worst-case latency vs HashMap's amortized O(1)",
+                "Memory constrained environments: ArrayList instead of LinkedList to reduce heap overhead by 60-70%"
+              ]
+            }
+          },
+          {
+            "id": "topic-6-4",
+            "title": "Internal Deep Dives",
+            "explanations": {
+              "english": "Internal implementations reveal karti hai kyun collections differently behave karte hain under the hood. HashMap use karta hai power-of-2 sized table jahan index = (n-1) & hash, with supplemental hashing (hash ^ hash>>>16) defend karne ke liye against poor hashCode() distributions jo cluster karte hain lower bits mein. Jab buckets exceed 8 entries, wo treeify ho jate hain into Red-Black trees (Node becomes TreeNode) maintain karne ke liye O(log n) worst case. ArrayList grow karta hai by 50% (newCapacity = old + old>>1) using Arrays.copyOf(), trading memory efficiency against resize frequency. TreeMap use karta hai left-leaning Red-Black tree invariants: no two red nodes in a row, equal black depth on all paths, ensure karte hain height ≤ 2log(n+1) through rotations aur recoloring during insertion/deletion. Ye mechanical details explain karte hain performance anomalies: HashMap iterator order change hota hai resize ke baad kyunki table indices recalculate hote hain; ArrayList trimToSize() prevent karta hai memory waste bulk loading ke baad; aur LinkedHashMap maintain karta hai before/after pointers jo stable rehte hain HashMap ke rehashing ke dauran."
+            },
+            "code": {
+              "title": "Implementation Details and Optimizations",
+              "language": "java",
+              "content": "// HashMap supplemental hashing defense\nstatic final int hash(Object key) {\n    int h;\n    // XOR high 16 bits with low 16 bits to handle poor hashCode() implementations\n    // that don't distribute high bits (common in sequential integers)\n    return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);\n}\n\n// HashMap index calculation (power of 2 requirement)\n// n = table.length (always 2^k)\n// index = (n - 1) & hash  // Equivalent to hash % n but faster\n\n// HashMap Treeification threshold\n// if (binCount >= TREEIFY_THRESHOLD - 1) // TREEIFY_THRESHOLD = 8\n//     treeifyBin(tab, hash); // Convert LinkedList to Red-Black Tree\n\n// ArrayList growth strategy\nprivate void grow(int minCapacity) {\n    int oldCapacity = elementData.length;\n    int newCapacity = oldCapacity + (oldCapacity >> 1); // 1.5x growth\n    elementData = Arrays.copyOf(elementData, newCapacity);\n}\n\n// Red-Black Tree properties (TreeMap/TreeSet)\n// 1. Every node is either red or black\n// 2. Root is always black\n// 3. No two adjacent red nodes (red parent cannot have red child)\n// 4. Every path from root to null has same number of black nodes\n// 5. New insertions are red, may require rotation/recoloring\n\n// LinkedHashMap linked list maintenance during rehash\n// During resize(), LinkedHashMap overrides transfer to maintain\n// before/after pointers while moving entries to new table[]\n// This preserves iteration order across hash table restructuring\n\n// Practical optimization: Pre-size collections\n// Calculate HashMap initial capacity:\n// desiredCapacity / loadFactor + 1.0\n// Prevents expensive resize and rehash operations"
+            },
+            "codeExplanations": {
+              "english": "Ye code reveal karta hai critical implementation mechanics. HashMap hash function dikhata hai supplemental hashing: XORing high 16 bits into low bits ensure karta hai ki hashCode() values jo sirf upper bits mein variation rakhte hain (common hai auto-generated IDs mein) still evenly distribute hain across table ke lower index bits. Index calculation comment explain karta hai kyun HashMap require karta hai power-of-2 sizes: bitwise AND with (n-1) replace karta hai slow modulo operations. TREEIFY_THRESHOLD constant (8) trigger karta hai conversion from linked list to balanced tree jab chains lambi hoti hain, preventing hash collision attacks se performance degrade hona O(n) mein. ArrayList ka 1.5x growth factor balance karta hai between memory waste (aggressive growth) aur frequent resizing (conservative growth). Red-Black tree properties ensure karta hai tree approximately balanced rahe, guarantee karte hain logarithmic operations. LinkedHashMap override comment explain karta hai kaise ye preserve karta hai iteration order underlying HashMap ke resize operation ke dauran, jo otherwise HashSet/HashMap ki iteration order scramble kar deta."
+            },
+            "keyPoints": [
+              "HashMap use karta hai supplemental hashing (XOR with high bits) defend karne ke liye against hashCode() implementations jo concentrate karte hain entropy high-order bits mein, prevent clustering in table indices",
+              "Java 8 HashMap convert karta hai linked lists to Red-Black trees jab bucket size exceeds 8, deteriorate karne se O(1) to O(log n) rather than O(n) under hash collision attacks ya poor hash distributions",
+              "ArrayList grow karta hai by 50% (1.5x) each resize using System.arraycopy(), ek native memory copy jo faster hai than element-by-element copying but still O(n) cost during growth",
+              "LinkedHashMap override karta hai HashMap ke internal transfer mechanism during resizing to maintain doubly-linked list pointers, ensure karta hai iteration order stability across table rehashing operations"
+            ],
+            "extras": {
+              "flowDiagram": "HashMap Treeification (Java 8+):\nBucket[5]: A -> B -> C -> D -> E -> F -> G -> H (8 nodes, linked list)\nAdd I:\n  1. Count = 9, exceeds TREEIFY_THRESHOLD (8)\n  2. If table.length >= MIN_TREEIFY_CAPACITY (64):\n       Convert to TreeNode structure\n       Balance as Red-Black Tree\n       \nResult: Bucket[5]: TreeRoot(Red/Black balanced)\n  Search complexity: O(log n) instead of O(n)",
+              "comparisonTable": "| Implementation Detail | HashMap | ArrayList | TreeMap |\n|----------------------|---------|-----------|---------|\n| Growth Strategy | Double (power of 2) | 1.5x | N/A (links) |\n| Collision Handling | Linked List -> Tree | N/A | N/A |\n| Resize Cost | O(n) rehash | O(n) array copy | N/A |\n| Hash Defense | Supplemental hash | N/A | Comparison based |\n| Memory Alignment | Padded to power of 2 | Exact requested | Node overhead |",
+              "examples": []
+            }
+          },
+          {
+            "id": "topic-6-5",
+            "title": "Real-world Usage Patterns",
+            "explanations": {
+              "english": "Collections solve karte hain specific architectural patterns production systems mein. LRU (Least Recently Used) caches use karte hain LinkedHashMap ko accessOrder=true aur removeEldestEntry() override ke saath to automatically evict stale entries jab size capacity exceed karti hai, ideal for image caches aur database query results. Event processing pipelines use karte hain BlockingQueues as buffers between producer aur consumer threads, with ArrayBlockingQueue for bounded memory aur LinkedBlockingQueue for unbounded scenarios, decoupling fast producers se slow consumers. Counters aur aggregations leverage karte hain ConcurrentHashMap ke compute() methods with LongAdder for statistical accumulators jo minimize karte hain thread contention compared to AtomicLong. Thread-safe caches combine karte hain ConcurrentHashMap ko soft ya weak references ke saath (via guava.cache ya custom) for memory-sensitive caching. ForkJoin framework use karta hai Deque work-stealing algorithms jahan each thread maintain karta hai ArrayDeque aur steal karta hai tasks from others' tails, enable karte hue efficient parallel execution. Sahi pattern choose karna prevent karta hai common issues jaise memory leaks in unbounded caches ya deadlocks in blocking queue consumers."
+            },
+            "code": {
+              "title": "Production Design Patterns",
+              "language": "java",
+              "content": "// Pattern 1: LRU Cache with LinkedHashMap\nclass ImageCache extends LinkedHashMap<String, BufferedImage> {\n    private final long maxMemory;\n    private long currentMemory = 0;\n    \n    public ImageCache(long maxMemory) {\n        super(128, 0.75f, true); // access-order\n        this.maxMemory = maxMemory;\n    }\n    \n    @Override\n    protected boolean removeEldestEntry(Map.Entry<String, BufferedImage> eldest) {\n        if (currentMemory > maxMemory) {\n            currentMemory -= estimateSize(eldest.getValue());\n            return true;\n        }\n        return false;\n    }\n}\n\n// Pattern 2: Producer-Consumer with BlockingQueue\npublic class TaskProcessor {\n    private final BlockingQueue<Task> queue = new LinkedBlockingQueue<>(1000);\n    \n    public void submit(Task task) throws InterruptedException {\n        queue.put(task); // Blocks if full (backpressure)\n    }\n    \n    public void runConsumer() {\n        while (!Thread.currentThread().isInterrupted()) {\n            try {\n                Task task = queue.take(); // Blocks if empty\n                process(task);\n            } catch (InterruptedException e) {\n                Thread.currentThread().interrupt();\n            }\n        }\n    }\n}\n\n// Pattern 3: Concurrent counters with LongAdder\nConcurrentHashMap<String, LongAdder> metrics = new ConcurrentHashMap<>();\npublic void recordEvent(String eventType) {\n    metrics.computeIfAbsent(eventType, k -> new LongAdder()).increment();\n}\npublic long getCount(String eventType) {\n    return metrics.getOrDefault(eventType, new LongAdder()).sum();\n}\n\n// Pattern 4: Work-stealing Deque (ForkJoinPool pattern)\nDeque<Task> deque = new ArrayDeque<>();\n// Owner thread uses push()/pop() (LIFO) for own tasks\n// Stealer threads use pollLast() (FIFO) to steal from opposite end\n// Reduces contention - owner works on newest, stealers take oldest"
+            },
+            "codeExplanations": {
+              "english": "Ye examples demonstrate karte hain production-grade patterns. ImageCache extend karta hai LinkedHashMap to create size-bounded cache jo evict karta hai least-recently-used entries jab memory limits exceed hote hain, using access-order mode recency track karne ke liye. TaskProcessor dikhata hai classic producer-consumer pattern using capacity-limited BlockingQueue to provide backpressure jab consumers lag behind producers, preventing OutOfMemoryErrors from unbounded queue growth. Metrics example demonstrate karta hai high-performance concurrent counting using LongAdder (jo stripes counts across cells to reduce contention) within ConcurrentHashMap, avoid karte hue synchronization bottleneck of synchronized counters. Work-stealing comment illustrate karta hai ForkJoinPool ka algorithm jahan each thread use karta hai apni Deque as stack (LIFO) for local tasks jabki doosre threads steal karte hain opposite end se (FIFO), minimize karte hue contention since owners aur thieves operate karte hain different ends of deque pe. Ye patterns solve karte hain real concurrency aur resource management challenges multi-threaded applications mein."
+            },
+            "keyPoints": [
+              "LRU caches implement hote hain by extending LinkedHashMap with accessOrder=true aur overriding removeEldestEntry() to define eviction policies based on entry count ya memory weight",
+              "BlockingQueues with bounded capacity provide essential backpressure producer-consumer patterns mein, preventing memory exhaustion jab producers outpace consumers",
+              "Concurrent statistical counters use karte hain ConcurrentHashMap with LongAdder values rather than AtomicLong to minimize write contention through internal striping across multiple counter cells",
+              "Work-stealing algorithms use karte hain Deque dual access patterns (LIFO for owners, FIFO for thieves) to enable efficient load balancing in thread pools bina centralized synchronization"
+            ],
+            "extras": {
+              "flowDiagram": "Producer-Consumer Flow:\nProducer -> [BlockingQueue] -> Consumer\n              (capacity limit)\n              /          \\\n        put() blocks  take() blocks\n        when full     when empty\n\nWork-Stealing Deque:\nThread A (Owner)      Thread B (Stealer)\n  push() -> [A,B,C] <- pollLast()\n              ^\n  pop() ------|\n(LIFO for owner, FIFO for stealers)",
+              "comparisonTable": "| Pattern | Collection | Key Benefit | Risk |\n|---------|------------|-------------|------|\n| LRU Cache | LinkedHashMap | Automatic eviction | Unbounded if not configured |\n| Producer-Consumer | BlockingQueue | Flow control | Deadlock if consumers fail |\n| Concurrent Counters | CHM<LongAdder> | High throughput | Memory overhead per key |\n| Work Stealing | ArrayDeque | Load balancing | Task locality loss |\n| Registry | ConcurrentHashMap | Lock-free reads | Iteration staleness |",
+              "examples": [
+                "Web server session cache: LinkedHashMap with time-based expiration and memory-weighted eviction",
+                "Log aggregation: LinkedBlockingQueue buffering log entries between application threads and disk writer",
+                "Real-time trading: ConcurrentHashMap accumulating per-symbol trade volumes with LongAdder"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+]
