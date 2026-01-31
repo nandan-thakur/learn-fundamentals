@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react'; // FIX: Imported useRef
 import { 
   Search, BookMarked, Sun, Moon, Menu, X, 
   Layout, CheckCircle2, Copy, Check, Terminal, 
@@ -46,8 +46,9 @@ const CodeBlock = ({ code, language, darkMode }) => {
       const parts = line.split(/(@\w+|public|class|void|static|return|new|private|final|const|function|import|from|=>|let|var|\/\/.*)/g);
       return (
         <div key={i} className="table-row group hover:bg-white/5 transition-colors">
-          <span className="table-cell text-right pr-4 select-none text-gray-600 dark:text-gray-600 w-8 text-xs group-hover:text-gray-400">{i + 1}</span>
-          <span className="table-cell break-all whitespace-pre-wrap font-code text-[13px] sm:text-sm">
+          <span className="table-cell text-right pr-4 select-none text-gray-600 dark:text-gray-600 w-8 text-xs group-hover:text-gray-400 align-top">{i + 1}</span>
+          {/* FIX 3: Changed whitespace-pre-wrap to whitespace-pre and removed break-all to force horizontal scroll */}
+          <span className="table-cell whitespace-pre font-code text-[13px] sm:text-sm align-top">
             {parts.map((part, index) => {
               if (part.startsWith('//')) return <span key={index} className="text-gray-500 italic">{part}</span>;
               if (part.startsWith('@')) return <span key={index} className="text-yellow-600 dark:text-yellow-400">{part}</span>;
@@ -79,8 +80,8 @@ const CodeBlock = ({ code, language, darkMode }) => {
           {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
-      <div className="p-4 overflow-x-auto text-gray-300 font-mono">
-        <div className="table w-full">
+      <div className="p-4 overflow-x-auto text-gray-300 font-mono w-full">
+        <div className="table min-w-full">
           {highlightCode(code)}
         </div>
       </div>
@@ -129,7 +130,7 @@ const getIconComponent = (iconName) => {
 const App = () => {
   const [darkMode, setDarkMode] = useState(true);
   
-  // FIX 1: Initialize based on screen width so desktop starts open
+  // FIX: Initialize logic for sidebar
   const [sidebarOpen, setSidebarOpen] = useState(
     typeof window !== 'undefined' ? window.innerWidth >= 1024 : false
   );
@@ -143,6 +144,9 @@ const App = () => {
   const [activeCourseId, setActiveCourseId] = useState('');
   const [appLanguage, setAppLanguage] = useState('english');
   const [isLoading, setIsLoading] = useState(true);
+
+  // FIX 1 & 2: Create a Ref to scroll the correct container
+  const mainScrollRef = useRef(null);
 
   // --- 1. INITIAL LOAD (Metadata) ---
   useEffect(() => {
@@ -290,13 +294,25 @@ const App = () => {
     setCompletedTopics(prev => prev.includes(topicId) ? prev.filter(id => id !== topicId) : [...prev, topicId]);
   };
 
+  // FIX 2: Updated scrollToElement to use the mainScrollRef instead of window
   const scrollToElement = (id) => {
     const element = document.getElementById(id);
-    if (element) {
-      const yOffset = -80; 
-      const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
-      window.scrollTo({top: y, behavior: 'smooth'});
+    const container = mainScrollRef.current;
+    
+    if (element && container) {
+      // Calculate position relative to the scrollable container
+      const topPos = element.offsetTop;
+      // Subtract header offset
+      container.scrollTo({ top: topPos - 30, behavior: 'smooth' });
+      
       if (window.innerWidth < 1024) setSidebarOpen(false);
+    }
+  };
+  
+  // FIX 1: Helper for "Move to Top" button
+  const scrollToTop = () => {
+    if (mainScrollRef.current) {
+        mainScrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -366,7 +382,6 @@ const App = () => {
             absolute lg:static inset-y-0 left-0 z-40
             w-[280px] flex-shrink-0 
             transform transition-transform duration-300 ease-in-out
-            /* FIX 2: Added lg:translate-x-0 so it is always visible on desktop */
             ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
             ${darkMode ? 'bg-[#0B1120] lg:bg-transparent border-r border-gray-800' : 'bg-white lg:bg-transparent border-r border-gray-200'}
             lg:border-none flex flex-col h-full
@@ -374,68 +389,69 @@ const App = () => {
         >
            {/* Sidebar Header (Mobile Only) */}
            <div className="lg:hidden flex items-center justify-between p-4 border-b border-white/5">
-              <span className="font-bold">Courses</span>
-              <button onClick={() => setSidebarOpen(false)}><X className="w-5 h-5" /></button>
+             <span className="font-bold">Courses</span>
+             <button onClick={() => setSidebarOpen(false)}><X className="w-5 h-5" /></button>
            </div>
 
            <div className="flex-1 overflow-y-auto p-4 scrollbar-hide">
-              <div className="space-y-1 mb-8">
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">Modules</h3>
-                {courseList.map(course => (
-                   <button 
-                     key={course.id}
-                     onClick={() => { setActiveCourseId(course.id); if(window.innerWidth < 1024) setSidebarOpen(false); }}
-                     className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-3 ${
-                       activeCourseId === course.id 
-                       ? 'bg-blue-600/10 text-blue-500' 
-                       : darkMode ? 'text-gray-400 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:bg-gray-100'
-                     }`}
-                   >
-                     {getIconComponent(course.icon)}
-                     <span>{course.title}</span>
-                   </button>
-                ))}
-              </div>
+             <div className="space-y-1 mb-8">
+               <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">Modules</h3>
+               {courseList.map(course => (
+                  <button 
+                    key={course.id}
+                    onClick={() => { setActiveCourseId(course.id); if(window.innerWidth < 1024) setSidebarOpen(false); }}
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-all flex items-center gap-3 ${
+                      activeCourseId === course.id 
+                      ? 'bg-blue-600/10 text-blue-500' 
+                      : darkMode ? 'text-gray-400 hover:text-white hover:bg-white/5' : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    {getIconComponent(course.icon)}
+                    <span>{course.title}</span>
+                  </button>
+               ))}
+             </div>
 
-              {currentContent && (
-                <div className="mb-20 lg:mb-0">
-                  <div className="relative mb-4">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
-                    <input 
-                      type="text" 
-                      placeholder="Filter topics..." 
-                      value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
-                      className={`w-full pl-9 pr-3 py-2 text-xs rounded-lg border ${darkMode ? 'bg-black/20 border-white/10 text-white' : 'bg-white border-gray-200'} focus:outline-none focus:border-blue-500`} 
-                    />
-                  </div>
-                  <div className="space-y-6">
-                    {filteredSections.map(section => (
-                      <div key={section.id}>
-                        <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 pl-2">{section.title}</h4>
-                        <div className="space-y-0.5 border-l border-gray-700/50 ml-2">
-                          {section.topics.map(topic => (
-                            <button
-                              key={topic.id}
-                              onClick={() => scrollToElement(topic.id)}
-                              className={`w-full text-left pl-3 pr-2 py-1.5 text-[12px] border-l -ml-px transition-colors block truncate ${
-                                completedTopics.includes(topic.id) ? 'text-green-500 border-green-500/50' : 'text-gray-400 hover:text-blue-400 hover:border-blue-500'
-                              }`}
-                            >
-                              {topic.title}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+             {currentContent && (
+               <div className="mb-20 lg:mb-0">
+                 <div className="relative mb-4">
+                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
+                   <input 
+                     type="text" 
+                     placeholder="Filter topics..." 
+                     value={searchQuery}
+                     onChange={e => setSearchQuery(e.target.value)}
+                     className={`w-full pl-9 pr-3 py-2 text-xs rounded-lg border ${darkMode ? 'bg-black/20 border-white/10 text-white' : 'bg-white border-gray-200'} focus:outline-none focus:border-blue-500`} 
+                   />
+                 </div>
+                 <div className="space-y-6">
+                   {filteredSections.map(section => (
+                     <div key={section.id}>
+                       <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 pl-2">{section.title}</h4>
+                       <div className="space-y-0.5 border-l border-gray-700/50 ml-2">
+                         {section.topics.map(topic => (
+                           <button
+                             key={topic.id}
+                             onClick={() => scrollToElement(topic.id)}
+                             className={`w-full text-left pl-3 pr-2 py-1.5 text-[12px] border-l -ml-px transition-colors block truncate ${
+                               completedTopics.includes(topic.id) ? 'text-green-500 border-green-500/50' : 'text-gray-400 hover:text-blue-400 hover:border-blue-500'
+                             }`}
+                           >
+                             {topic.title}
+                           </button>
+                         ))}
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+               </div>
+             )}
            </div>
         </aside>
 
         {/* --- MAIN CONTENT SCROLL AREA --- */}
-        <main className="flex-1 overflow-y-auto relative w-full scroll-smooth">
+        {/* FIX 1 & 2: Added ref={mainScrollRef} to this scrollable container */}
+        <main ref={mainScrollRef} className="flex-1 overflow-y-auto relative w-full scroll-smooth">
           {sidebarOpen && (
             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />
           )}
@@ -464,9 +480,9 @@ const App = () => {
                   {filteredSections.map(section => (
                     <div key={section.id} id={section.id}>
                       <div className="flex items-center gap-4 mb-8">
-                         <span className="h-px flex-1 bg-gray-700/50"></span>
-                         <h2 className="text-xl font-bold">{section.title}</h2>
-                         <span className="h-px flex-1 bg-gray-700/50"></span>
+                          <span className="h-px flex-1 bg-gray-700/50"></span>
+                          <h2 className="text-xl font-bold">{section.title}</h2>
+                          <span className="h-px flex-1 bg-gray-700/50"></span>
                       </div>
 
                       <div className="space-y-8">
@@ -557,7 +573,8 @@ const App = () => {
            <span className="text-[10px] font-medium text-gray-400">Language</span>
          </button>
 
-         <button onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})} className="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-blue-500">
+         {/* FIX 1: Updated onClick to use scrollToTop */}
+         <button onClick={scrollToTop} className="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-blue-500">
             <Home className="w-5 h-5" />
             <span className="text-[10px] font-medium">Top</span>
          </button>
